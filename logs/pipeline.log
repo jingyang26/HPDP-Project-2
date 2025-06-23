@@ -12,3 +12,17 @@
 2025-06-22 23:38:29,759 - __main__ - INFO -   Filtered out: 204
 2025-06-22 23:38:29,760 - __main__ - INFO -   API errors: 0
 2025-06-22 23:38:29,760 - __main__ - INFO -   Total items: 3246
+2025-06-23 16:24:25,222 - __main__ - INFO -   Posts: data/raw/malaysia_tourism_posts_20250623_162425.jsonl
+2025-06-23 16:24:25,258 - __main__ - INFO -   Comments: data/raw/malaysia_tourism_comments_20250623_162425.jsonl
+2025-06-23 16:24:25,269 - __main__ - INFO -   Subreddits: ['malaysia', 'malaysiatravel', 'travel', 'solotravel', 'backpacking', 'TravelNoPics', 'digitalnomad', 'AsiaTravel']
+2025-06-23 16:24:25,272 - __main__ - INFO -   Keywords: 22 Malaysian tourism terms
+2025-06-23 16:24:25,273 - __main__ - INFO -   Max posts: 800, Max comments per post: 15
+2025-06-23 16:24:25,273 - __main__ - INFO -   Strategies: ['hot', 'new', 'top', 'search']
+2025-06-23 16:24:25,288 - __main__ - INFO - ============================================================
+2025-06-23 16:38:58,155 - __main__ - INFO -   Runtime: 0:14:32.874648
+2025-06-23 16:38:58,158 - __main__ - INFO -   Posts collected: 428
+2025-06-23 16:38:58,159 - __main__ - INFO -   Comments collected: 4379
+2025-06-23 16:38:58,160 - __main__ - INFO -   Malaysia-related: 114
+2025-06-23 16:38:58,161 - __main__ - INFO -   Filtered out: 317
+2025-06-23 16:38:58,161 - __main__ - INFO -   API errors: 0
+2025-06-23 16:38:58,162 - __main__ - INFO -   Total items: 4807

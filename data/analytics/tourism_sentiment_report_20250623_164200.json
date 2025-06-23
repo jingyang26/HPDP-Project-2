@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-06-23T16:42:17.386316",
+  "runtime": "0:00:17.207472",
+  "processing_stats": {
+    "messages_processed": 4807,
+    "posts_analyzed": 428,
+    "comments_analyzed": 4379,
+    "sentiment_distribution": {
+      "positive": 3030,
+      "neutral": 1129,
+      "negative": 648
+    },
+    "malaysia_related_count": 1002,
+    "processing_errors": 0,
+    "start_time": 

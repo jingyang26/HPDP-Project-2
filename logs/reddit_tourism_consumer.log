@@ -1,0 +1,1182 @@
+2025-06-23 16:19:35,815 - __main__ - INFO - ✅ Consumer directories created/verified
+2025-06-23 16:19:44,735 - __main__ - INFO - ✅ Sentiment analysis models initialized
+2025-06-23 16:19:44,736 - __main__ - INFO - ✅ Sentiment analyzer initialized
+2025-06-23 16:19:44,736 - __main__ - INFO - ⚠️ Kafka not available - using file processing mode
+2025-06-23 16:19:44,737 - __main__ - INFO - 📋 Consumer configuration loaded:
+2025-06-23 16:19:44,737 - __main__ - INFO -   Batch size: 100
+2025-06-23 16:19:44,737 - __main__ - INFO -   Analytics interval: 60s
+2025-06-23 16:19:44,738 - __main__ - INFO -   Output file: data/processed/sentiment_analysis_20250623_161944.jsonl
+2025-06-23 16:19:44,738 - __main__ - INFO - ✅ Analytics tracking initialized
+2025-06-23 16:19:44,739 - __main__ - INFO - 🚀 Starting Malaysian Tourism Sentiment Consumer
+2025-06-23 16:19:44,740 - __main__ - INFO - ============================================================
+2025-06-23 16:19:44,740 - __main__ - INFO - 📁 Processing from saved files...
+2025-06-23 16:19:44,742 - __main__ - INFO - 📂 Found 2 files to process
+2025-06-23 16:19:44,743 - __main__ - INFO - 📄 Processing file: malaysia_tourism_comments_20250622_232803.jsonl
+2025-06-23 16:19:45,064 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:45,064 - __main__ - INFO -   Runtime: 0:00:00.325467
+2025-06-23 16:19:45,065 - __main__ - INFO -   Messages processed: 50
+2025-06-23 16:19:45,065 - __main__ - INFO -   Posts: 0, Comments: 50
+2025-06-23 16:19:45,066 - __main__ - INFO -   Malaysia-related: 46
+2025-06-23 16:19:45,066 - __main__ - INFO -   Sentiment distribution: {'positive': 19, 'neutral': 17, 'negative': 14}
+2025-06-23 16:19:45,066 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:45,159 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:45,160 - __main__ - INFO -   Runtime: 0:00:00.420467
+2025-06-23 16:19:45,160 - __main__ - INFO -   Messages processed: 100
+2025-06-23 16:19:45,161 - __main__ - INFO -   Posts: 0, Comments: 100
+2025-06-23 16:19:45,161 - __main__ - INFO -   Malaysia-related: 59
+2025-06-23 16:19:45,162 - __main__ - INFO -   Sentiment distribution: {'positive': 43, 'neutral': 32, 'negative': 25}
+2025-06-23 16:19:45,162 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:45,306 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:45,306 - __main__ - INFO -   Runtime: 0:00:00.567582
+2025-06-23 16:19:45,307 - __main__ - INFO -   Messages processed: 150
+2025-06-23 16:19:45,307 - __main__ - INFO -   Posts: 0, Comments: 150
+2025-06-23 16:19:45,308 - __main__ - INFO -   Malaysia-related: 81
+2025-06-23 16:19:45,309 - __main__ - INFO -   Sentiment distribution: {'positive': 58, 'neutral': 57, 'negative': 35}
+2025-06-23 16:19:45,309 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:45,453 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:45,454 - __main__ - INFO -   Runtime: 0:00:00.714725
+2025-06-23 16:19:45,454 - __main__ - INFO -   Messages processed: 200
+2025-06-23 16:19:45,455 - __main__ - INFO -   Posts: 0, Comments: 200
+2025-06-23 16:19:45,455 - __main__ - INFO -   Malaysia-related: 128
+2025-06-23 16:19:45,456 - __main__ - INFO -   Sentiment distribution: {'positive': 75, 'neutral': 76, 'negative': 49}
+2025-06-23 16:19:45,456 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:45,608 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:45,609 - __main__ - INFO -   Runtime: 0:00:00.869706
+2025-06-23 16:19:45,609 - __main__ - INFO -   Messages processed: 250
+2025-06-23 16:19:45,610 - __main__ - INFO -   Posts: 0, Comments: 250
+2025-06-23 16:19:45,610 - __main__ - INFO -   Malaysia-related: 135
+2025-06-23 16:19:45,611 - __main__ - INFO -   Sentiment distribution: {'positive': 106, 'neutral': 85, 'negative': 59}
+2025-06-23 16:19:45,611 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:45,793 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:45,793 - __main__ - INFO -   Runtime: 0:00:01.054713
+2025-06-23 16:19:45,794 - __main__ - INFO -   Messages processed: 300
+2025-06-23 16:19:45,795 - __main__ - INFO -   Posts: 0, Comments: 300
+2025-06-23 16:19:45,795 - __main__ - INFO -   Malaysia-related: 135
+2025-06-23 16:19:45,796 - __main__ - INFO -   Sentiment distribution: {'positive': 141, 'neutral': 94, 'negative': 65}
+2025-06-23 16:19:45,796 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:45,968 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:45,968 - __main__ - INFO -   Runtime: 0:00:01.229726
+2025-06-23 16:19:45,969 - __main__ - INFO -   Messages processed: 350
+2025-06-23 16:19:45,969 - __main__ - INFO -   Posts: 0, Comments: 350
+2025-06-23 16:19:45,970 - __main__ - INFO -   Malaysia-related: 135
+2025-06-23 16:19:45,971 - __main__ - INFO -   Sentiment distribution: {'positive': 181, 'neutral': 100, 'negative': 69}
+2025-06-23 16:19:45,971 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:46,140 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:46,141 - __main__ - INFO -   Runtime: 0:00:01.401353
+2025-06-23 16:19:46,141 - __main__ - INFO -   Messages processed: 400
+2025-06-23 16:19:46,142 - __main__ - INFO -   Posts: 0, Comments: 400
+2025-06-23 16:19:46,142 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:46,143 - __main__ - INFO -   Sentiment distribution: {'positive': 215, 'neutral': 110, 'negative': 75}
+2025-06-23 16:19:46,144 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:46,335 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:46,335 - __main__ - INFO -   Runtime: 0:00:01.596349
+2025-06-23 16:19:46,336 - __main__ - INFO -   Messages processed: 450
+2025-06-23 16:19:46,336 - __main__ - INFO -   Posts: 0, Comments: 450
+2025-06-23 16:19:46,337 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:46,337 - __main__ - INFO -   Sentiment distribution: {'positive': 246, 'neutral': 124, 'negative': 80}
+2025-06-23 16:19:46,338 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:46,454 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:46,454 - __main__ - INFO -   Runtime: 0:00:01.715310
+2025-06-23 16:19:46,455 - __main__ - INFO -   Messages processed: 500
+2025-06-23 16:19:46,455 - __main__ - INFO -   Posts: 0, Comments: 500
+2025-06-23 16:19:46,455 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:46,457 - __main__ - INFO -   Sentiment distribution: {'positive': 280, 'neutral': 136, 'negative': 84}
+2025-06-23 16:19:46,457 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:46,584 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:46,584 - __main__ - INFO -   Runtime: 0:00:01.844708
+2025-06-23 16:19:46,585 - __main__ - INFO -   Messages processed: 550
+2025-06-23 16:19:46,585 - __main__ - INFO -   Posts: 0, Comments: 550
+2025-06-23 16:19:46,586 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:46,586 - __main__ - INFO -   Sentiment distribution: {'positive': 316, 'neutral': 145, 'negative': 89}
+2025-06-23 16:19:46,586 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:46,729 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:46,730 - __main__ - INFO -   Runtime: 0:00:01.990696
+2025-06-23 16:19:46,731 - __main__ - INFO -   Messages processed: 600
+2025-06-23 16:19:46,731 - __main__ - INFO -   Posts: 0, Comments: 600
+2025-06-23 16:19:46,732 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:46,732 - __main__ - INFO -   Sentiment distribution: {'positive': 338, 'neutral': 166, 'negative': 96}
+2025-06-23 16:19:46,733 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:46,860 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:46,860 - __main__ - INFO -   Runtime: 0:00:02.121697
+2025-06-23 16:19:46,861 - __main__ - INFO -   Messages processed: 650
+2025-06-23 16:19:46,861 - __main__ - INFO -   Posts: 0, Comments: 650
+2025-06-23 16:19:46,862 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:46,862 - __main__ - INFO -   Sentiment distribution: {'positive': 366, 'neutral': 177, 'negative': 107}
+2025-06-23 16:19:46,863 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:46,986 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:46,986 - __main__ - INFO -   Runtime: 0:00:02.247697
+2025-06-23 16:19:46,987 - __main__ - INFO -   Messages processed: 700
+2025-06-23 16:19:46,987 - __main__ - INFO -   Posts: 0, Comments: 700
+2025-06-23 16:19:46,988 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:46,988 - __main__ - INFO -   Sentiment distribution: {'positive': 398, 'neutral': 190, 'negative': 112}
+2025-06-23 16:19:46,989 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:47,154 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:47,154 - __main__ - INFO -   Runtime: 0:00:02.415719
+2025-06-23 16:19:47,155 - __main__ - INFO -   Messages processed: 750
+2025-06-23 16:19:47,155 - __main__ - INFO -   Posts: 0, Comments: 750
+2025-06-23 16:19:47,156 - __main__ - INFO -   Malaysia-related: 136
+2025-06-23 16:19:47,156 - __main__ - INFO -   Sentiment distribution: {'positive': 430, 'neutral': 202, 'negative': 118}
+2025-06-23 16:19:47,157 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:47,327 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:47,327 - __main__ - INFO -   Runtime: 0:00:02.587707
+2025-06-23 16:19:47,328 - __main__ - INFO -   Messages processed: 800
+2025-06-23 16:19:47,328 - __main__ - INFO -   Posts: 0, Comments: 800
+2025-06-23 16:19:47,329 - __main__ - INFO -   Malaysia-related: 137
+2025-06-23 16:19:47,329 - __main__ - INFO -   Sentiment distribution: {'positive': 466, 'neutral': 210, 'negative': 124}
+2025-06-23 16:19:47,330 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:47,452 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:47,452 - __main__ - INFO -   Runtime: 0:00:02.713722
+2025-06-23 16:19:47,453 - __main__ - INFO -   Messages processed: 850
+2025-06-23 16:19:47,453 - __main__ - INFO -   Posts: 0, Comments: 850
+2025-06-23 16:19:47,454 - __main__ - INFO -   Malaysia-related: 137
+2025-06-23 16:19:47,454 - __main__ - INFO -   Sentiment distribution: {'positive': 493, 'neutral': 226, 'negative': 131}
+2025-06-23 16:19:47,455 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:47,613 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:47,613 - __main__ - INFO -   Runtime: 0:00:02.874693
+2025-06-23 16:19:47,614 - __main__ - INFO -   Messages processed: 900
+2025-06-23 16:19:47,614 - __main__ - INFO -   Posts: 0, Comments: 900
+2025-06-23 16:19:47,615 - __main__ - INFO -   Malaysia-related: 141
+2025-06-23 16:19:47,615 - __main__ - INFO -   Sentiment distribution: {'positive': 526, 'neutral': 238, 'negative': 136}
+2025-06-23 16:19:47,616 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:47,731 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:47,731 - __main__ - INFO -   Runtime: 0:00:02.992721
+2025-06-23 16:19:47,732 - __main__ - INFO -   Messages processed: 950
+2025-06-23 16:19:47,733 - __main__ - INFO -   Posts: 0, Comments: 950
+2025-06-23 16:19:47,733 - __main__ - INFO -   Malaysia-related: 164
+2025-06-23 16:19:47,733 - __main__ - INFO -   Sentiment distribution: {'positive': 547, 'neutral': 256, 'negative': 147}
+2025-06-23 16:19:47,734 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:47,894 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:47,895 - __main__ - INFO -   Runtime: 0:00:03.155166
+2025-06-23 16:19:47,895 - __main__ - INFO -   Messages processed: 1000
+2025-06-23 16:19:47,896 - __main__ - INFO -   Posts: 0, Comments: 1000
+2025-06-23 16:19:47,896 - __main__ - INFO -   Malaysia-related: 177
+2025-06-23 16:19:47,897 - __main__ - INFO -   Sentiment distribution: {'positive': 575, 'neutral': 271, 'negative': 154}
+2025-06-23 16:19:47,898 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:48,067 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:48,068 - __main__ - INFO -   Runtime: 0:00:03.328148
+2025-06-23 16:19:48,069 - __main__ - INFO -   Messages processed: 1050
+2025-06-23 16:19:48,069 - __main__ - INFO -   Posts: 0, Comments: 1050
+2025-06-23 16:19:48,069 - __main__ - INFO -   Malaysia-related: 179
+2025-06-23 16:19:48,070 - __main__ - INFO -   Sentiment distribution: {'positive': 604, 'neutral': 282, 'negative': 164}
+2025-06-23 16:19:48,070 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:48,247 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:48,248 - __main__ - INFO -   Runtime: 0:00:03.508763
+2025-06-23 16:19:48,248 - __main__ - INFO -   Messages processed: 1100
+2025-06-23 16:19:48,249 - __main__ - INFO -   Posts: 0, Comments: 1100
+2025-06-23 16:19:48,249 - __main__ - INFO -   Malaysia-related: 179
+2025-06-23 16:19:48,250 - __main__ - INFO -   Sentiment distribution: {'positive': 641, 'neutral': 291, 'negative': 168}
+2025-06-23 16:19:48,250 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:48,401 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:48,402 - __main__ - INFO -   Runtime: 0:00:03.662772
+2025-06-23 16:19:48,403 - __main__ - INFO -   Messages processed: 1150
+2025-06-23 16:19:48,403 - __main__ - INFO -   Posts: 0, Comments: 1150
+2025-06-23 16:19:48,403 - __main__ - INFO -   Malaysia-related: 210
+2025-06-23 16:19:48,404 - __main__ - INFO -   Sentiment distribution: {'positive': 662, 'neutral': 310, 'negative': 178}
+2025-06-23 16:19:48,404 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:48,514 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:48,515 - __main__ - INFO -   Runtime: 0:00:03.775767
+2025-06-23 16:19:48,515 - __main__ - INFO -   Messages processed: 1200
+2025-06-23 16:19:48,516 - __main__ - INFO -   Posts: 0, Comments: 1200
+2025-06-23 16:19:48,516 - __main__ - INFO -   Malaysia-related: 219
+2025-06-23 16:19:48,517 - __main__ - INFO -   Sentiment distribution: {'positive': 690, 'neutral': 323, 'negative': 187}
+2025-06-23 16:19:48,517 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:48,673 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:48,674 - __main__ - INFO -   Runtime: 0:00:03.934791
+2025-06-23 16:19:48,674 - __main__ - INFO -   Messages processed: 1250
+2025-06-23 16:19:48,675 - __main__ - INFO -   Posts: 0, Comments: 1250
+2025-06-23 16:19:48,675 - __main__ - INFO -   Malaysia-related: 236
+2025-06-23 16:19:48,675 - __main__ - INFO -   Sentiment distribution: {'positive': 715, 'neutral': 335, 'negative': 200}
+2025-06-23 16:19:48,676 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:48,770 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:48,771 - __main__ - INFO -   Runtime: 0:00:04.031783
+2025-06-23 16:19:48,772 - __main__ - INFO -   Messages processed: 1300
+2025-06-23 16:19:48,772 - __main__ - INFO -   Posts: 0, Comments: 1300
+2025-06-23 16:19:48,773 - __main__ - INFO -   Malaysia-related: 244
+2025-06-23 16:19:48,773 - __main__ - INFO -   Sentiment distribution: {'positive': 746, 'neutral': 348, 'negative': 206}
+2025-06-23 16:19:48,774 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:48,894 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:48,895 - __main__ - INFO -   Runtime: 0:00:04.155770
+2025-06-23 16:19:48,895 - __main__ - INFO -   Messages processed: 1350
+2025-06-23 16:19:48,896 - __main__ - INFO -   Posts: 0, Comments: 1350
+2025-06-23 16:19:48,896 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:48,897 - __main__ - INFO -   Sentiment distribution: {'positive': 766, 'neutral': 368, 'negative': 216}
+2025-06-23 16:19:48,897 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:49,025 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:49,025 - __main__ - INFO -   Runtime: 0:00:04.286033
+2025-06-23 16:19:49,026 - __main__ - INFO -   Messages processed: 1400
+2025-06-23 16:19:49,026 - __main__ - INFO -   Posts: 0, Comments: 1400
+2025-06-23 16:19:49,026 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:49,028 - __main__ - INFO -   Sentiment distribution: {'positive': 809, 'neutral': 372, 'negative': 219}
+2025-06-23 16:19:49,028 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:49,232 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:49,233 - __main__ - INFO -   Runtime: 0:00:04.493705
+2025-06-23 16:19:49,234 - __main__ - INFO -   Messages processed: 1450
+2025-06-23 16:19:49,234 - __main__ - INFO -   Posts: 0, Comments: 1450
+2025-06-23 16:19:49,235 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:49,235 - __main__ - INFO -   Sentiment distribution: {'positive': 850, 'neutral': 380, 'negative': 220}
+2025-06-23 16:19:49,236 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:49,355 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:49,357 - __main__ - INFO -   Runtime: 0:00:04.616694
+2025-06-23 16:19:49,357 - __main__ - INFO -   Messages processed: 1500
+2025-06-23 16:19:49,358 - __main__ - INFO -   Posts: 0, Comments: 1500
+2025-06-23 16:19:49,359 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:49,360 - __main__ - INFO -   Sentiment distribution: {'positive': 894, 'neutral': 386, 'negative': 220}
+2025-06-23 16:19:49,361 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:49,519 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:49,520 - __main__ - INFO -   Runtime: 0:00:04.780702
+2025-06-23 16:19:49,520 - __main__ - INFO -   Messages processed: 1550
+2025-06-23 16:19:49,521 - __main__ - INFO -   Posts: 0, Comments: 1550
+2025-06-23 16:19:49,521 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:49,522 - __main__ - INFO -   Sentiment distribution: {'positive': 925, 'neutral': 397, 'negative': 228}
+2025-06-23 16:19:49,522 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:49,710 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:49,710 - __main__ - INFO -   Runtime: 0:00:04.971705
+2025-06-23 16:19:49,711 - __main__ - INFO -   Messages processed: 1600
+2025-06-23 16:19:49,711 - __main__ - INFO -   Posts: 0, Comments: 1600
+2025-06-23 16:19:49,712 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:49,712 - __main__ - INFO -   Sentiment distribution: {'positive': 963, 'neutral': 403, 'negative': 234}
+2025-06-23 16:19:49,713 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:49,917 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:49,918 - __main__ - INFO -   Runtime: 0:00:05.178695
+2025-06-23 16:19:49,918 - __main__ - INFO -   Messages processed: 1650
+2025-06-23 16:19:49,919 - __main__ - INFO -   Posts: 0, Comments: 1650
+2025-06-23 16:19:49,919 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:49,920 - __main__ - INFO -   Sentiment distribution: {'positive': 1001, 'neutral': 412, 'negative': 237}
+2025-06-23 16:19:49,920 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:50,090 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:50,090 - __main__ - INFO -   Runtime: 0:00:05.351720
+2025-06-23 16:19:50,091 - __main__ - INFO -   Messages processed: 1700
+2025-06-23 16:19:50,091 - __main__ - INFO -   Posts: 0, Comments: 1700
+2025-06-23 16:19:50,092 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:50,092 - __main__ - INFO -   Sentiment distribution: {'positive': 1032, 'neutral': 426, 'negative': 242}
+2025-06-23 16:19:50,092 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:50,291 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:50,292 - __main__ - INFO -   Runtime: 0:00:05.552705
+2025-06-23 16:19:50,292 - __main__ - INFO -   Messages processed: 1750
+2025-06-23 16:19:50,293 - __main__ - INFO -   Posts: 0, Comments: 1750
+2025-06-23 16:19:50,293 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:50,294 - __main__ - INFO -   Sentiment distribution: {'positive': 1063, 'neutral': 432, 'negative': 255}
+2025-06-23 16:19:50,294 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:50,435 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:50,435 - __main__ - INFO -   Runtime: 0:00:05.696708
+2025-06-23 16:19:50,436 - __main__ - INFO -   Messages processed: 1800
+2025-06-23 16:19:50,436 - __main__ - INFO -   Posts: 0, Comments: 1800
+2025-06-23 16:19:50,437 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:50,437 - __main__ - INFO -   Sentiment distribution: {'positive': 1097, 'neutral': 444, 'negative': 259}
+2025-06-23 16:19:50,438 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:50,583 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:50,583 - __main__ - INFO -   Runtime: 0:00:05.844778
+2025-06-23 16:19:50,584 - __main__ - INFO -   Messages processed: 1850
+2025-06-23 16:19:50,584 - __main__ - INFO -   Posts: 0, Comments: 1850
+2025-06-23 16:19:50,585 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:50,585 - __main__ - INFO -   Sentiment distribution: {'positive': 1135, 'neutral': 453, 'negative': 262}
+2025-06-23 16:19:50,586 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:50,700 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:50,701 - __main__ - INFO -   Runtime: 0:00:05.961763
+2025-06-23 16:19:50,701 - __main__ - INFO -   Messages processed: 1900
+2025-06-23 16:19:50,702 - __main__ - INFO -   Posts: 0, Comments: 1900
+2025-06-23 16:19:50,702 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:50,703 - __main__ - INFO -   Sentiment distribution: {'positive': 1175, 'neutral': 462, 'negative': 263}
+2025-06-23 16:19:50,703 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:50,864 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:50,865 - __main__ - INFO -   Runtime: 0:00:06.125763
+2025-06-23 16:19:50,865 - __main__ - INFO -   Messages processed: 1950
+2025-06-23 16:19:50,866 - __main__ - INFO -   Posts: 0, Comments: 1950
+2025-06-23 16:19:50,866 - __main__ - INFO -   Malaysia-related: 259
+2025-06-23 16:19:50,867 - __main__ - INFO -   Sentiment distribution: {'positive': 1205, 'neutral': 472, 'negative': 273}
+2025-06-23 16:19:50,867 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:51,005 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:51,005 - __main__ - INFO -   Runtime: 0:00:06.266737
+2025-06-23 16:19:51,006 - __main__ - INFO -   Messages processed: 2000
+2025-06-23 16:19:51,006 - __main__ - INFO -   Posts: 0, Comments: 2000
+2025-06-23 16:19:51,007 - __main__ - INFO -   Malaysia-related: 261
+2025-06-23 16:19:51,007 - __main__ - INFO -   Sentiment distribution: {'positive': 1250, 'neutral': 475, 'negative': 275}
+2025-06-23 16:19:51,008 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:51,182 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:51,183 - __main__ - INFO -   Runtime: 0:00:06.443765
+2025-06-23 16:19:51,183 - __main__ - INFO -   Messages processed: 2050
+2025-06-23 16:19:51,183 - __main__ - INFO -   Posts: 0, Comments: 2050
+2025-06-23 16:19:51,184 - __main__ - INFO -   Malaysia-related: 261
+2025-06-23 16:19:51,184 - __main__ - INFO -   Sentiment distribution: {'positive': 1283, 'neutral': 486, 'negative': 281}
+2025-06-23 16:19:51,185 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:51,310 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:51,311 - __main__ - INFO -   Runtime: 0:00:06.571763
+2025-06-23 16:19:51,311 - __main__ - INFO -   Messages processed: 2100
+2025-06-23 16:19:51,312 - __main__ - INFO -   Posts: 0, Comments: 2100
+2025-06-23 16:19:51,312 - __main__ - INFO -   Malaysia-related: 261
+2025-06-23 16:19:51,313 - __main__ - INFO -   Sentiment distribution: {'positive': 1316, 'neutral': 499, 'negative': 285}
+2025-06-23 16:19:51,313 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:51,462 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:51,462 - __main__ - INFO -   Runtime: 0:00:06.723750
+2025-06-23 16:19:51,463 - __main__ - INFO -   Messages processed: 2150
+2025-06-23 16:19:51,463 - __main__ - INFO -   Posts: 0, Comments: 2150
+2025-06-23 16:19:51,463 - __main__ - INFO -   Malaysia-related: 276
+2025-06-23 16:19:51,464 - __main__ - INFO -   Sentiment distribution: {'positive': 1345, 'neutral': 508, 'negative': 297}
+2025-06-23 16:19:51,464 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:51,609 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:51,610 - __main__ - INFO -   Runtime: 0:00:06.870871
+2025-06-23 16:19:51,610 - __main__ - INFO -   Messages processed: 2200
+2025-06-23 16:19:51,611 - __main__ - INFO -   Posts: 0, Comments: 2200
+2025-06-23 16:19:51,612 - __main__ - INFO -   Malaysia-related: 276
+2025-06-23 16:19:51,612 - __main__ - INFO -   Sentiment distribution: {'positive': 1366, 'neutral': 524, 'negative': 310}
+2025-06-23 16:19:51,613 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:51,739 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:51,740 - __main__ - INFO -   Runtime: 0:00:07.000876
+2025-06-23 16:19:51,741 - __main__ - INFO -   Messages processed: 2250
+2025-06-23 16:19:51,741 - __main__ - INFO -   Posts: 0, Comments: 2250
+2025-06-23 16:19:51,742 - __main__ - INFO -   Malaysia-related: 276
+2025-06-23 16:19:51,742 - __main__ - INFO -   Sentiment distribution: {'positive': 1390, 'neutral': 539, 'negative': 321}
+2025-06-23 16:19:51,742 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:51,936 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:51,937 - __main__ - INFO -   Runtime: 0:00:07.197405
+2025-06-23 16:19:51,937 - __main__ - INFO -   Messages processed: 2300
+2025-06-23 16:19:51,937 - __main__ - INFO -   Posts: 0, Comments: 2300
+2025-06-23 16:19:51,938 - __main__ - INFO -   Malaysia-related: 276
+2025-06-23 16:19:51,938 - __main__ - INFO -   Sentiment distribution: {'positive': 1426, 'neutral': 546, 'negative': 328}
+2025-06-23 16:19:51,939 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:52,092 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:52,093 - __main__ - INFO -   Runtime: 0:00:07.353395
+2025-06-23 16:19:52,093 - __main__ - INFO -   Messages processed: 2350
+2025-06-23 16:19:52,094 - __main__ - INFO -   Posts: 0, Comments: 2350
+2025-06-23 16:19:52,094 - __main__ - INFO -   Malaysia-related: 311
+2025-06-23 16:19:52,095 - __main__ - INFO -   Sentiment distribution: {'positive': 1451, 'neutral': 560, 'negative': 339}
+2025-06-23 16:19:52,095 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:52,276 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:52,277 - __main__ - INFO -   Runtime: 0:00:07.537933
+2025-06-23 16:19:52,277 - __main__ - INFO -   Messages processed: 2400
+2025-06-23 16:19:52,278 - __main__ - INFO -   Posts: 0, Comments: 2400
+2025-06-23 16:19:52,278 - __main__ - INFO -   Malaysia-related: 361
+2025-06-23 16:19:52,279 - __main__ - INFO -   Sentiment distribution: {'positive': 1470, 'neutral': 582, 'negative': 348}
+2025-06-23 16:19:52,280 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:52,514 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:52,514 - __main__ - INFO -   Runtime: 0:00:07.774150
+2025-06-23 16:19:52,515 - __main__ - INFO -   Messages processed: 2450
+2025-06-23 16:19:52,515 - __main__ - INFO -   Posts: 0, Comments: 2450
+2025-06-23 16:19:52,516 - __main__ - INFO -   Malaysia-related: 411
+2025-06-23 16:19:52,516 - __main__ - INFO -   Sentiment distribution: {'positive': 1498, 'neutral': 590, 'negative': 362}
+2025-06-23 16:19:52,517 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:52,637 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:52,637 - __main__ - INFO -   Runtime: 0:00:07.898146
+2025-06-23 16:19:52,638 - __main__ - INFO -   Messages processed: 2500
+2025-06-23 16:19:52,638 - __main__ - INFO -   Posts: 0, Comments: 2500
+2025-06-23 16:19:52,639 - __main__ - INFO -   Malaysia-related: 461
+2025-06-23 16:19:52,639 - __main__ - INFO -   Sentiment distribution: {'positive': 1520, 'neutral': 609, 'negative': 371}
+2025-06-23 16:19:52,640 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:52,907 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:52,908 - __main__ - INFO -   Runtime: 0:00:08.168133
+2025-06-23 16:19:52,908 - __main__ - INFO -   Messages processed: 2550
+2025-06-23 16:19:52,909 - __main__ - INFO -   Posts: 0, Comments: 2550
+2025-06-23 16:19:52,909 - __main__ - INFO -   Malaysia-related: 511
+2025-06-23 16:19:52,909 - __main__ - INFO -   Sentiment distribution: {'positive': 1559, 'neutral': 617, 'negative': 374}
+2025-06-23 16:19:52,910 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:53,073 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:53,074 - __main__ - INFO -   Runtime: 0:00:08.335019
+2025-06-23 16:19:53,074 - __main__ - INFO -   Messages processed: 2600
+2025-06-23 16:19:53,075 - __main__ - INFO -   Posts: 0, Comments: 2600
+2025-06-23 16:19:53,075 - __main__ - INFO -   Malaysia-related: 561
+2025-06-23 16:19:53,076 - __main__ - INFO -   Sentiment distribution: {'positive': 1602, 'neutral': 621, 'negative': 377}
+2025-06-23 16:19:53,076 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:53,342 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:53,343 - __main__ - INFO -   Runtime: 0:00:08.603377
+2025-06-23 16:19:53,343 - __main__ - INFO -   Messages processed: 2650
+2025-06-23 16:19:53,343 - __main__ - INFO -   Posts: 0, Comments: 2650
+2025-06-23 16:19:53,344 - __main__ - INFO -   Malaysia-related: 596
+2025-06-23 16:19:53,344 - __main__ - INFO -   Sentiment distribution: {'positive': 1644, 'neutral': 624, 'negative': 382}
+2025-06-23 16:19:53,344 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:53,675 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:53,675 - __main__ - INFO -   Runtime: 0:00:08.937002
+2025-06-23 16:19:53,677 - __main__ - INFO -   Messages processed: 2700
+2025-06-23 16:19:53,677 - __main__ - INFO -   Posts: 0, Comments: 2700
+2025-06-23 16:19:53,677 - __main__ - INFO -   Malaysia-related: 623
+2025-06-23 16:19:53,678 - __main__ - INFO -   Sentiment distribution: {'positive': 1685, 'neutral': 633, 'negative': 382}
+2025-06-23 16:19:53,678 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:53,884 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:53,885 - __main__ - INFO -   Runtime: 0:00:09.145578
+2025-06-23 16:19:53,885 - __main__ - INFO -   Messages processed: 2750
+2025-06-23 16:19:53,885 - __main__ - INFO -   Posts: 0, Comments: 2750
+2025-06-23 16:19:53,886 - __main__ - INFO -   Malaysia-related: 637
+2025-06-23 16:19:53,886 - __main__ - INFO -   Sentiment distribution: {'positive': 1725, 'neutral': 640, 'negative': 385}
+2025-06-23 16:19:53,886 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:54,015 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:54,016 - __main__ - INFO -   Runtime: 0:00:09.276583
+2025-06-23 16:19:54,016 - __main__ - INFO -   Messages processed: 2800
+2025-06-23 16:19:54,016 - __main__ - INFO -   Posts: 0, Comments: 2800
+2025-06-23 16:19:54,017 - __main__ - INFO -   Malaysia-related: 657
+2025-06-23 16:19:54,017 - __main__ - INFO -   Sentiment distribution: {'positive': 1761, 'neutral': 650, 'negative': 389}
+2025-06-23 16:19:54,018 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:54,158 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:54,159 - __main__ - INFO -   Runtime: 0:00:09.419601
+2025-06-23 16:19:54,159 - __main__ - INFO -   Messages processed: 2850
+2025-06-23 16:19:54,160 - __main__ - INFO -   Posts: 0, Comments: 2850
+2025-06-23 16:19:54,160 - __main__ - INFO -   Malaysia-related: 683
+2025-06-23 16:19:54,161 - __main__ - INFO -   Sentiment distribution: {'positive': 1790, 'neutral': 666, 'negative': 394}
+2025-06-23 16:19:54,161 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:54,300 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:54,300 - __main__ - INFO -   Runtime: 0:00:09.561587
+2025-06-23 16:19:54,301 - __main__ - INFO -   Messages processed: 2900
+2025-06-23 16:19:54,301 - __main__ - INFO -   Posts: 0, Comments: 2900
+2025-06-23 16:19:54,302 - __main__ - INFO -   Malaysia-related: 688
+2025-06-23 16:19:54,302 - __main__ - INFO -   Sentiment distribution: {'positive': 1828, 'neutral': 674, 'negative': 398}
+2025-06-23 16:19:54,303 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:54,439 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:54,440 - __main__ - INFO -   Runtime: 0:00:09.700590
+2025-06-23 16:19:54,441 - __main__ - INFO -   Messages processed: 2950
+2025-06-23 16:19:54,441 - __main__ - INFO -   Posts: 0, Comments: 2950
+2025-06-23 16:19:54,442 - __main__ - INFO -   Malaysia-related: 694
+2025-06-23 16:19:54,442 - __main__ - INFO -   Sentiment distribution: {'positive': 1857, 'neutral': 690, 'negative': 403}
+2025-06-23 16:19:54,443 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:54,466 - __main__ - INFO - 📄 Processing file: malaysia_tourism_posts_20250622_232803.jsonl
+2025-06-23 16:19:54,772 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:54,772 - __main__ - INFO -   Runtime: 0:00:10.033990
+2025-06-23 16:19:54,773 - __main__ - INFO -   Messages processed: 3000
+2025-06-23 16:19:54,773 - __main__ - INFO -   Posts: 42, Comments: 2958
+2025-06-23 16:19:54,774 - __main__ - INFO -   Malaysia-related: 707
+2025-06-23 16:19:54,775 - __main__ - INFO -   Sentiment distribution: {'positive': 1886, 'neutral': 702, 'negative': 412}
+2025-06-23 16:19:54,775 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:55,114 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:55,115 - __main__ - INFO -   Runtime: 0:00:10.375390
+2025-06-23 16:19:55,115 - __main__ - INFO -   Messages processed: 3050
+2025-06-23 16:19:55,116 - __main__ - INFO -   Posts: 92, Comments: 2958
+2025-06-23 16:19:55,116 - __main__ - INFO -   Malaysia-related: 709
+2025-06-23 16:19:55,117 - __main__ - INFO -   Sentiment distribution: {'positive': 1928, 'neutral': 705, 'negative': 417}
+2025-06-23 16:19:55,117 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:55,547 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:55,548 - __main__ - INFO -   Runtime: 0:00:10.808396
+2025-06-23 16:19:55,548 - __main__ - INFO -   Messages processed: 3100
+2025-06-23 16:19:55,549 - __main__ - INFO -   Posts: 142, Comments: 2958
+2025-06-23 16:19:55,549 - __main__ - INFO -   Malaysia-related: 718
+2025-06-23 16:19:55,550 - __main__ - INFO -   Sentiment distribution: {'positive': 1958, 'neutral': 717, 'negative': 425}
+2025-06-23 16:19:55,551 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:55,936 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:55,936 - __main__ - INFO -   Runtime: 0:00:11.197384
+2025-06-23 16:19:55,937 - __main__ - INFO -   Messages processed: 3150
+2025-06-23 16:19:55,937 - __main__ - INFO -   Posts: 192, Comments: 2958
+2025-06-23 16:19:55,938 - __main__ - INFO -   Malaysia-related: 723
+2025-06-23 16:19:55,938 - __main__ - INFO -   Sentiment distribution: {'positive': 1990, 'neutral': 727, 'negative': 433}
+2025-06-23 16:19:55,938 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:56,331 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:56,332 - __main__ - INFO -   Runtime: 0:00:11.592798
+2025-06-23 16:19:56,332 - __main__ - INFO -   Messages processed: 3200
+2025-06-23 16:19:56,333 - __main__ - INFO -   Posts: 242, Comments: 2958
+2025-06-23 16:19:56,333 - __main__ - INFO -   Malaysia-related: 739
+2025-06-23 16:19:56,334 - __main__ - INFO -   Sentiment distribution: {'positive': 2021, 'neutral': 740, 'negative': 439}
+2025-06-23 16:19:56,334 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:57,083 - __main__ - INFO - ✅ File processing completed! Processed 3246 messages
+2025-06-23 16:19:57,086 - __main__ - ERROR - Failed to save analytics report: Object of type datetime is not JSON serializable
+2025-06-23 16:19:57,086 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:19:57,086 - __main__ - INFO -   Runtime: 0:00:12.348019
+2025-06-23 16:19:57,088 - __main__ - INFO -   Messages processed: 3246
+2025-06-23 16:19:57,088 - __main__ - INFO -   Posts: 288, Comments: 2958
+2025-06-23 16:19:57,088 - __main__ - INFO -   Malaysia-related: 780
+2025-06-23 16:19:57,088 - __main__ - INFO -   Sentiment distribution: {'positive': 2057, 'neutral': 742, 'negative': 447}
+2025-06-23 16:19:57,088 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:19:57,089 - __main__ - INFO - ✅ SENTIMENT ANALYSIS COMPLETED!
+2025-06-23 16:19:57,090 - __main__ - INFO - 📊 Total processed: 3246 messages
+2025-06-23 16:19:57,090 - __main__ - INFO - 🇲🇾 Malaysia-related: 780
+2025-06-23 16:19:57,091 - __main__ - INFO - 📈 Sentiment distribution: {'positive': 2057, 'neutral': 742, 'negative': 447}
+2025-06-23 16:19:57,091 - __main__ - INFO - 📁 Results saved to: data/processed/sentiment_analysis_20250623_161944.jsonl
+2025-06-23 16:19:57,092 - __main__ - INFO - 📊 Analytics report: data/analytics/tourism_sentiment_report_20250623_161944.json
+2025-06-23 16:19:57,092 - __main__ - INFO - 🔚 Consumer shutdown complete
+2025-06-23 16:41:59,620 - __main__ - INFO - ✅ Consumer directories created/verified
+2025-06-23 16:42:00,174 - __main__ - INFO - ✅ Sentiment analysis models initialized
+2025-06-23 16:42:00,175 - __main__ - INFO - ✅ Sentiment analyzer initialized
+2025-06-23 16:42:00,175 - __main__ - INFO - ⚠️ Kafka not available - using file processing mode
+2025-06-23 16:42:00,176 - __main__ - INFO - 📋 Consumer configuration loaded:
+2025-06-23 16:42:00,176 - __main__ - INFO -   Batch size: 100
+2025-06-23 16:42:00,177 - __main__ - INFO -   Analytics interval: 60s
+2025-06-23 16:42:00,177 - __main__ - INFO -   Output file: data/processed/sentiment_analysis_20250623_164200.jsonl
+2025-06-23 16:42:00,178 - __main__ - INFO - ✅ Analytics tracking initialized
+2025-06-23 16:42:00,178 - __main__ - INFO - 🚀 Starting Malaysian Tourism Sentiment Consumer
+2025-06-23 16:42:00,179 - __main__ - INFO - ============================================================
+2025-06-23 16:42:00,179 - __main__ - INFO - 📁 Processing from saved files...
+2025-06-23 16:42:00,181 - __main__ - INFO - 📂 Found 2 files to process
+2025-06-23 16:42:00,182 - __main__ - INFO - 📄 Processing file: malaysia_tourism_comments_20250623_162425.jsonl
+2025-06-23 16:42:00,369 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:00,370 - __main__ - INFO -   Runtime: 0:00:00.191020
+2025-06-23 16:42:00,370 - __main__ - INFO -   Messages processed: 50
+2025-06-23 16:42:00,371 - __main__ - INFO -   Posts: 0, Comments: 50
+2025-06-23 16:42:00,371 - __main__ - INFO -   Malaysia-related: 29
+2025-06-23 16:42:00,372 - __main__ - INFO -   Sentiment distribution: {'positive': 29, 'neutral': 10, 'negative': 11}
+2025-06-23 16:42:00,372 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:00,485 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:00,485 - __main__ - INFO -   Runtime: 0:00:00.307008
+2025-06-23 16:42:00,486 - __main__ - INFO -   Messages processed: 100
+2025-06-23 16:42:00,486 - __main__ - INFO -   Posts: 0, Comments: 100
+2025-06-23 16:42:00,487 - __main__ - INFO -   Malaysia-related: 63
+2025-06-23 16:42:00,487 - __main__ - INFO -   Sentiment distribution: {'positive': 49, 'neutral': 31, 'negative': 20}
+2025-06-23 16:42:00,487 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:00,589 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:00,590 - __main__ - INFO -   Runtime: 0:00:00.411008
+2025-06-23 16:42:00,590 - __main__ - INFO -   Messages processed: 150
+2025-06-23 16:42:00,591 - __main__ - INFO -   Posts: 0, Comments: 150
+2025-06-23 16:42:00,591 - __main__ - INFO -   Malaysia-related: 91
+2025-06-23 16:42:00,592 - __main__ - INFO -   Sentiment distribution: {'positive': 72, 'neutral': 46, 'negative': 32}
+2025-06-23 16:42:00,592 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:00,700 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:00,700 - __main__ - INFO -   Runtime: 0:00:00.522006
+2025-06-23 16:42:00,701 - __main__ - INFO -   Messages processed: 200
+2025-06-23 16:42:00,701 - __main__ - INFO -   Posts: 0, Comments: 200
+2025-06-23 16:42:00,702 - __main__ - INFO -   Malaysia-related: 130
+2025-06-23 16:42:00,702 - __main__ - INFO -   Sentiment distribution: {'positive': 82, 'neutral': 74, 'negative': 44}
+2025-06-23 16:42:00,703 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:00,840 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:00,841 - __main__ - INFO -   Runtime: 0:00:00.661599
+2025-06-23 16:42:00,841 - __main__ - INFO -   Messages processed: 250
+2025-06-23 16:42:00,842 - __main__ - INFO -   Posts: 0, Comments: 250
+2025-06-23 16:42:00,842 - __main__ - INFO -   Malaysia-related: 142
+2025-06-23 16:42:00,843 - __main__ - INFO -   Sentiment distribution: {'positive': 106, 'neutral': 93, 'negative': 51}
+2025-06-23 16:42:00,843 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:00,993 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:00,994 - __main__ - INFO -   Runtime: 0:00:00.814606
+2025-06-23 16:42:00,995 - __main__ - INFO -   Messages processed: 300
+2025-06-23 16:42:00,995 - __main__ - INFO -   Posts: 0, Comments: 300
+2025-06-23 16:42:00,996 - __main__ - INFO -   Malaysia-related: 161
+2025-06-23 16:42:00,996 - __main__ - INFO -   Sentiment distribution: {'positive': 133, 'neutral': 111, 'negative': 56}
+2025-06-23 16:42:00,997 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:01,167 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:01,167 - __main__ - INFO -   Runtime: 0:00:00.987618
+2025-06-23 16:42:01,168 - __main__ - INFO -   Messages processed: 350
+2025-06-23 16:42:01,168 - __main__ - INFO -   Posts: 0, Comments: 350
+2025-06-23 16:42:01,169 - __main__ - INFO -   Malaysia-related: 161
+2025-06-23 16:42:01,169 - __main__ - INFO -   Sentiment distribution: {'positive': 165, 'neutral': 122, 'negative': 63}
+2025-06-23 16:42:01,169 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:01,328 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:01,328 - __main__ - INFO -   Runtime: 0:00:01.149597
+2025-06-23 16:42:01,329 - __main__ - INFO -   Messages processed: 400
+2025-06-23 16:42:01,330 - __main__ - INFO -   Posts: 0, Comments: 400
+2025-06-23 16:42:01,330 - __main__ - INFO -   Malaysia-related: 161
+2025-06-23 16:42:01,330 - __main__ - INFO -   Sentiment distribution: {'positive': 208, 'neutral': 127, 'negative': 65}
+2025-06-23 16:42:01,331 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:01,460 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:01,461 - __main__ - INFO -   Runtime: 0:00:01.281618
+2025-06-23 16:42:01,462 - __main__ - INFO -   Messages processed: 450
+2025-06-23 16:42:01,462 - __main__ - INFO -   Posts: 0, Comments: 450
+2025-06-23 16:42:01,462 - __main__ - INFO -   Malaysia-related: 161
+2025-06-23 16:42:01,463 - __main__ - INFO -   Sentiment distribution: {'positive': 244, 'neutral': 138, 'negative': 68}
+2025-06-23 16:42:01,463 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:01,613 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:01,613 - __main__ - INFO -   Runtime: 0:00:01.434298
+2025-06-23 16:42:01,614 - __main__ - INFO -   Messages processed: 500
+2025-06-23 16:42:01,614 - __main__ - INFO -   Posts: 0, Comments: 500
+2025-06-23 16:42:01,615 - __main__ - INFO -   Malaysia-related: 161
+2025-06-23 16:42:01,615 - __main__ - INFO -   Sentiment distribution: {'positive': 274, 'neutral': 154, 'negative': 72}
+2025-06-23 16:42:01,616 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:01,862 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:01,863 - __main__ - INFO -   Runtime: 0:00:01.683310
+2025-06-23 16:42:01,863 - __main__ - INFO -   Messages processed: 550
+2025-06-23 16:42:01,863 - __main__ - INFO -   Posts: 0, Comments: 550
+2025-06-23 16:42:01,864 - __main__ - INFO -   Malaysia-related: 162
+2025-06-23 16:42:01,864 - __main__ - INFO -   Sentiment distribution: {'positive': 308, 'neutral': 163, 'negative': 79}
+2025-06-23 16:42:01,865 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:02,041 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:02,041 - __main__ - INFO -   Runtime: 0:00:01.862311
+2025-06-23 16:42:02,042 - __main__ - INFO -   Messages processed: 600
+2025-06-23 16:42:02,043 - __main__ - INFO -   Posts: 0, Comments: 600
+2025-06-23 16:42:02,043 - __main__ - INFO -   Malaysia-related: 162
+2025-06-23 16:42:02,044 - __main__ - INFO -   Sentiment distribution: {'positive': 343, 'neutral': 175, 'negative': 82}
+2025-06-23 16:42:02,044 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:02,234 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:02,235 - __main__ - INFO -   Runtime: 0:00:02.055306
+2025-06-23 16:42:02,235 - __main__ - INFO -   Messages processed: 650
+2025-06-23 16:42:02,236 - __main__ - INFO -   Posts: 0, Comments: 650
+2025-06-23 16:42:02,236 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:02,237 - __main__ - INFO -   Sentiment distribution: {'positive': 376, 'neutral': 185, 'negative': 89}
+2025-06-23 16:42:02,237 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:02,469 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:02,470 - __main__ - INFO -   Runtime: 0:00:02.290826
+2025-06-23 16:42:02,470 - __main__ - INFO -   Messages processed: 700
+2025-06-23 16:42:02,471 - __main__ - INFO -   Posts: 0, Comments: 700
+2025-06-23 16:42:02,471 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:02,472 - __main__ - INFO -   Sentiment distribution: {'positive': 413, 'neutral': 193, 'negative': 94}
+2025-06-23 16:42:02,472 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:02,610 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:02,611 - __main__ - INFO -   Runtime: 0:00:02.431829
+2025-06-23 16:42:02,611 - __main__ - INFO -   Messages processed: 750
+2025-06-23 16:42:02,612 - __main__ - INFO -   Posts: 0, Comments: 750
+2025-06-23 16:42:02,612 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:02,612 - __main__ - INFO -   Sentiment distribution: {'positive': 447, 'neutral': 206, 'negative': 97}
+2025-06-23 16:42:02,613 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:02,869 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:02,870 - __main__ - INFO -   Runtime: 0:00:02.690692
+2025-06-23 16:42:02,870 - __main__ - INFO -   Messages processed: 800
+2025-06-23 16:42:02,871 - __main__ - INFO -   Posts: 0, Comments: 800
+2025-06-23 16:42:02,871 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:02,871 - __main__ - INFO -   Sentiment distribution: {'positive': 485, 'neutral': 214, 'negative': 101}
+2025-06-23 16:42:02,872 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:03,034 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:03,036 - __main__ - INFO -   Runtime: 0:00:02.855421
+2025-06-23 16:42:03,036 - __main__ - INFO -   Messages processed: 850
+2025-06-23 16:42:03,036 - __main__ - INFO -   Posts: 0, Comments: 850
+2025-06-23 16:42:03,037 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:03,037 - __main__ - INFO -   Sentiment distribution: {'positive': 525, 'neutral': 223, 'negative': 102}
+2025-06-23 16:42:03,037 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:03,183 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:03,183 - __main__ - INFO -   Runtime: 0:00:03.004503
+2025-06-23 16:42:03,184 - __main__ - INFO -   Messages processed: 900
+2025-06-23 16:42:03,184 - __main__ - INFO -   Posts: 0, Comments: 900
+2025-06-23 16:42:03,185 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:03,185 - __main__ - INFO -   Sentiment distribution: {'positive': 562, 'neutral': 232, 'negative': 106}
+2025-06-23 16:42:03,186 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:03,334 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:03,334 - __main__ - INFO -   Runtime: 0:00:03.155519
+2025-06-23 16:42:03,335 - __main__ - INFO -   Messages processed: 950
+2025-06-23 16:42:03,335 - __main__ - INFO -   Posts: 0, Comments: 950
+2025-06-23 16:42:03,336 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:03,336 - __main__ - INFO -   Sentiment distribution: {'positive': 585, 'neutral': 253, 'negative': 112}
+2025-06-23 16:42:03,337 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:03,459 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:03,460 - __main__ - INFO -   Runtime: 0:00:03.280516
+2025-06-23 16:42:03,460 - __main__ - INFO -   Messages processed: 1000
+2025-06-23 16:42:03,461 - __main__ - INFO -   Posts: 0, Comments: 1000
+2025-06-23 16:42:03,461 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:03,462 - __main__ - INFO -   Sentiment distribution: {'positive': 611, 'neutral': 265, 'negative': 124}
+2025-06-23 16:42:03,462 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:03,587 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:03,588 - __main__ - INFO -   Runtime: 0:00:03.408503
+2025-06-23 16:42:03,588 - __main__ - INFO -   Messages processed: 1050
+2025-06-23 16:42:03,589 - __main__ - INFO -   Posts: 0, Comments: 1050
+2025-06-23 16:42:03,589 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:03,590 - __main__ - INFO -   Sentiment distribution: {'positive': 645, 'neutral': 277, 'negative': 128}
+2025-06-23 16:42:03,590 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:03,767 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:03,767 - __main__ - INFO -   Runtime: 0:00:03.588517
+2025-06-23 16:42:03,768 - __main__ - INFO -   Messages processed: 1100
+2025-06-23 16:42:03,768 - __main__ - INFO -   Posts: 0, Comments: 1100
+2025-06-23 16:42:03,769 - __main__ - INFO -   Malaysia-related: 165
+2025-06-23 16:42:03,769 - __main__ - INFO -   Sentiment distribution: {'positive': 679, 'neutral': 289, 'negative': 132}
+2025-06-23 16:42:03,769 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:03,938 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:03,939 - __main__ - INFO -   Runtime: 0:00:03.759836
+2025-06-23 16:42:03,939 - __main__ - INFO -   Messages processed: 1150
+2025-06-23 16:42:03,940 - __main__ - INFO -   Posts: 0, Comments: 1150
+2025-06-23 16:42:03,940 - __main__ - INFO -   Malaysia-related: 167
+2025-06-23 16:42:03,941 - __main__ - INFO -   Sentiment distribution: {'positive': 727, 'neutral': 291, 'negative': 132}
+2025-06-23 16:42:03,941 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:04,118 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:04,119 - __main__ - INFO -   Runtime: 0:00:03.939804
+2025-06-23 16:42:04,119 - __main__ - INFO -   Messages processed: 1200
+2025-06-23 16:42:04,120 - __main__ - INFO -   Posts: 0, Comments: 1200
+2025-06-23 16:42:04,120 - __main__ - INFO -   Malaysia-related: 168
+2025-06-23 16:42:04,120 - __main__ - INFO -   Sentiment distribution: {'positive': 761, 'neutral': 301, 'negative': 138}
+2025-06-23 16:42:04,121 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:04,294 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:04,294 - __main__ - INFO -   Runtime: 0:00:04.115838
+2025-06-23 16:42:04,295 - __main__ - INFO -   Messages processed: 1250
+2025-06-23 16:42:04,295 - __main__ - INFO -   Posts: 0, Comments: 1250
+2025-06-23 16:42:04,296 - __main__ - INFO -   Malaysia-related: 172
+2025-06-23 16:42:04,296 - __main__ - INFO -   Sentiment distribution: {'positive': 792, 'neutral': 311, 'negative': 147}
+2025-06-23 16:42:04,296 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:04,487 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:04,488 - __main__ - INFO -   Runtime: 0:00:04.308804
+2025-06-23 16:42:04,488 - __main__ - INFO -   Messages processed: 1300
+2025-06-23 16:42:04,489 - __main__ - INFO -   Posts: 0, Comments: 1300
+2025-06-23 16:42:04,489 - __main__ - INFO -   Malaysia-related: 172
+2025-06-23 16:42:04,490 - __main__ - INFO -   Sentiment distribution: {'positive': 821, 'neutral': 328, 'negative': 151}
+2025-06-23 16:42:04,490 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:04,610 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:04,611 - __main__ - INFO -   Runtime: 0:00:04.431835
+2025-06-23 16:42:04,611 - __main__ - INFO -   Messages processed: 1350
+2025-06-23 16:42:04,611 - __main__ - INFO -   Posts: 0, Comments: 1350
+2025-06-23 16:42:04,612 - __main__ - INFO -   Malaysia-related: 173
+2025-06-23 16:42:04,612 - __main__ - INFO -   Sentiment distribution: {'positive': 846, 'neutral': 347, 'negative': 157}
+2025-06-23 16:42:04,613 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:04,732 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:04,732 - __main__ - INFO -   Runtime: 0:00:04.553842
+2025-06-23 16:42:04,733 - __main__ - INFO -   Messages processed: 1400
+2025-06-23 16:42:04,733 - __main__ - INFO -   Posts: 0, Comments: 1400
+2025-06-23 16:42:04,734 - __main__ - INFO -   Malaysia-related: 173
+2025-06-23 16:42:04,734 - __main__ - INFO -   Sentiment distribution: {'positive': 876, 'neutral': 362, 'negative': 162}
+2025-06-23 16:42:04,735 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:04,927 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:04,928 - __main__ - INFO -   Runtime: 0:00:04.748833
+2025-06-23 16:42:04,928 - __main__ - INFO -   Messages processed: 1450
+2025-06-23 16:42:04,929 - __main__ - INFO -   Posts: 0, Comments: 1450
+2025-06-23 16:42:04,929 - __main__ - INFO -   Malaysia-related: 177
+2025-06-23 16:42:04,930 - __main__ - INFO -   Sentiment distribution: {'positive': 901, 'neutral': 379, 'negative': 170}
+2025-06-23 16:42:04,930 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,060 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,060 - __main__ - INFO -   Runtime: 0:00:04.881833
+2025-06-23 16:42:05,061 - __main__ - INFO -   Messages processed: 1500
+2025-06-23 16:42:05,061 - __main__ - INFO -   Posts: 0, Comments: 1500
+2025-06-23 16:42:05,062 - __main__ - INFO -   Malaysia-related: 177
+2025-06-23 16:42:05,062 - __main__ - INFO -   Sentiment distribution: {'positive': 933, 'neutral': 391, 'negative': 176}
+2025-06-23 16:42:05,063 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,203 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,204 - __main__ - INFO -   Runtime: 0:00:05.024808
+2025-06-23 16:42:05,204 - __main__ - INFO -   Messages processed: 1550
+2025-06-23 16:42:05,205 - __main__ - INFO -   Posts: 0, Comments: 1550
+2025-06-23 16:42:05,205 - __main__ - INFO -   Malaysia-related: 177
+2025-06-23 16:42:05,206 - __main__ - INFO -   Sentiment distribution: {'positive': 954, 'neutral': 406, 'negative': 190}
+2025-06-23 16:42:05,206 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,380 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,380 - __main__ - INFO -   Runtime: 0:00:05.201837
+2025-06-23 16:42:05,381 - __main__ - INFO -   Messages processed: 1600
+2025-06-23 16:42:05,382 - __main__ - INFO -   Posts: 0, Comments: 1600
+2025-06-23 16:42:05,382 - __main__ - INFO -   Malaysia-related: 186
+2025-06-23 16:42:05,382 - __main__ - INFO -   Sentiment distribution: {'positive': 986, 'neutral': 419, 'negative': 195}
+2025-06-23 16:42:05,383 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,510 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,511 - __main__ - INFO -   Runtime: 0:00:05.331817
+2025-06-23 16:42:05,511 - __main__ - INFO -   Messages processed: 1650
+2025-06-23 16:42:05,512 - __main__ - INFO -   Posts: 0, Comments: 1650
+2025-06-23 16:42:05,512 - __main__ - INFO -   Malaysia-related: 221
+2025-06-23 16:42:05,513 - __main__ - INFO -   Sentiment distribution: {'positive': 1012, 'neutral': 435, 'negative': 203}
+2025-06-23 16:42:05,513 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,661 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,661 - __main__ - INFO -   Runtime: 0:00:05.482838
+2025-06-23 16:42:05,663 - __main__ - INFO -   Messages processed: 1700
+2025-06-23 16:42:05,663 - __main__ - INFO -   Posts: 0, Comments: 1700
+2025-06-23 16:42:05,663 - __main__ - INFO -   Malaysia-related: 236
+2025-06-23 16:42:05,664 - __main__ - INFO -   Sentiment distribution: {'positive': 1037, 'neutral': 447, 'negative': 216}
+2025-06-23 16:42:05,665 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,779 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,780 - __main__ - INFO -   Runtime: 0:00:05.601066
+2025-06-23 16:42:05,780 - __main__ - INFO -   Messages processed: 1750
+2025-06-23 16:42:05,780 - __main__ - INFO -   Posts: 0, Comments: 1750
+2025-06-23 16:42:05,781 - __main__ - INFO -   Malaysia-related: 240
+2025-06-23 16:42:05,781 - __main__ - INFO -   Sentiment distribution: {'positive': 1059, 'neutral': 464, 'negative': 227}
+2025-06-23 16:42:05,782 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,876 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,877 - __main__ - INFO -   Runtime: 0:00:05.698066
+2025-06-23 16:42:05,877 - __main__ - INFO -   Messages processed: 1800
+2025-06-23 16:42:05,878 - __main__ - INFO -   Posts: 0, Comments: 1800
+2025-06-23 16:42:05,878 - __main__ - INFO -   Malaysia-related: 250
+2025-06-23 16:42:05,878 - __main__ - INFO -   Sentiment distribution: {'positive': 1087, 'neutral': 479, 'negative': 234}
+2025-06-23 16:42:05,879 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:05,982 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:05,983 - __main__ - INFO -   Runtime: 0:00:05.804071
+2025-06-23 16:42:05,983 - __main__ - INFO -   Messages processed: 1850
+2025-06-23 16:42:05,984 - __main__ - INFO -   Posts: 0, Comments: 1850
+2025-06-23 16:42:05,984 - __main__ - INFO -   Malaysia-related: 273
+2025-06-23 16:42:05,985 - __main__ - INFO -   Sentiment distribution: {'positive': 1101, 'neutral': 500, 'negative': 249}
+2025-06-23 16:42:05,985 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,085 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,086 - __main__ - INFO -   Runtime: 0:00:05.907042
+2025-06-23 16:42:06,086 - __main__ - INFO -   Messages processed: 1900
+2025-06-23 16:42:06,086 - __main__ - INFO -   Posts: 0, Comments: 1900
+2025-06-23 16:42:06,087 - __main__ - INFO -   Malaysia-related: 283
+2025-06-23 16:42:06,087 - __main__ - INFO -   Sentiment distribution: {'positive': 1120, 'neutral': 520, 'negative': 260}
+2025-06-23 16:42:06,088 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,236 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,236 - __main__ - INFO -   Runtime: 0:00:06.058054
+2025-06-23 16:42:06,237 - __main__ - INFO -   Messages processed: 1950
+2025-06-23 16:42:06,237 - __main__ - INFO -   Posts: 0, Comments: 1950
+2025-06-23 16:42:06,237 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:06,238 - __main__ - INFO -   Sentiment distribution: {'positive': 1140, 'neutral': 537, 'negative': 273}
+2025-06-23 16:42:06,238 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,368 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,368 - __main__ - INFO -   Runtime: 0:00:06.190065
+2025-06-23 16:42:06,369 - __main__ - INFO -   Messages processed: 2000
+2025-06-23 16:42:06,369 - __main__ - INFO -   Posts: 0, Comments: 2000
+2025-06-23 16:42:06,370 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:06,370 - __main__ - INFO -   Sentiment distribution: {'positive': 1177, 'neutral': 543, 'negative': 280}
+2025-06-23 16:42:06,371 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,502 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,502 - __main__ - INFO -   Runtime: 0:00:06.323415
+2025-06-23 16:42:06,503 - __main__ - INFO -   Messages processed: 2050
+2025-06-23 16:42:06,503 - __main__ - INFO -   Posts: 0, Comments: 2050
+2025-06-23 16:42:06,504 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:06,504 - __main__ - INFO -   Sentiment distribution: {'positive': 1218, 'neutral': 550, 'negative': 282}
+2025-06-23 16:42:06,505 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,634 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,635 - __main__ - INFO -   Runtime: 0:00:06.455537
+2025-06-23 16:42:06,636 - __main__ - INFO -   Messages processed: 2100
+2025-06-23 16:42:06,636 - __main__ - INFO -   Posts: 0, Comments: 2100
+2025-06-23 16:42:06,636 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:06,637 - __main__ - INFO -   Sentiment distribution: {'positive': 1264, 'neutral': 554, 'negative': 282}
+2025-06-23 16:42:06,637 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,753 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,753 - __main__ - INFO -   Runtime: 0:00:06.573692
+2025-06-23 16:42:06,754 - __main__ - INFO -   Messages processed: 2150
+2025-06-23 16:42:06,754 - __main__ - INFO -   Posts: 0, Comments: 2150
+2025-06-23 16:42:06,754 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:06,755 - __main__ - INFO -   Sentiment distribution: {'positive': 1302, 'neutral': 565, 'negative': 283}
+2025-06-23 16:42:06,755 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,868 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,869 - __main__ - INFO -   Runtime: 0:00:06.689693
+2025-06-23 16:42:06,869 - __main__ - INFO -   Messages processed: 2200
+2025-06-23 16:42:06,870 - __main__ - INFO -   Posts: 0, Comments: 2200
+2025-06-23 16:42:06,870 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:06,870 - __main__ - INFO -   Sentiment distribution: {'positive': 1333, 'neutral': 578, 'negative': 289}
+2025-06-23 16:42:06,871 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:06,982 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:06,982 - __main__ - INFO -   Runtime: 0:00:06.803679
+2025-06-23 16:42:06,983 - __main__ - INFO -   Messages processed: 2250
+2025-06-23 16:42:06,983 - __main__ - INFO -   Posts: 0, Comments: 2250
+2025-06-23 16:42:06,984 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:06,984 - __main__ - INFO -   Sentiment distribution: {'positive': 1377, 'neutral': 580, 'negative': 293}
+2025-06-23 16:42:06,985 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:07,143 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:07,144 - __main__ - INFO -   Runtime: 0:00:06.964358
+2025-06-23 16:42:07,144 - __main__ - INFO -   Messages processed: 2300
+2025-06-23 16:42:07,144 - __main__ - INFO -   Posts: 0, Comments: 2300
+2025-06-23 16:42:07,144 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:07,146 - __main__ - INFO -   Sentiment distribution: {'positive': 1416, 'neutral': 585, 'negative': 299}
+2025-06-23 16:42:07,146 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:07,361 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:07,362 - __main__ - INFO -   Runtime: 0:00:07.182969
+2025-06-23 16:42:07,362 - __main__ - INFO -   Messages processed: 2350
+2025-06-23 16:42:07,363 - __main__ - INFO -   Posts: 0, Comments: 2350
+2025-06-23 16:42:07,364 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:07,364 - __main__ - INFO -   Sentiment distribution: {'positive': 1452, 'neutral': 591, 'negative': 307}
+2025-06-23 16:42:07,365 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:07,657 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:07,658 - __main__ - INFO -   Runtime: 0:00:07.479064
+2025-06-23 16:42:07,659 - __main__ - INFO -   Messages processed: 2400
+2025-06-23 16:42:07,659 - __main__ - INFO -   Posts: 0, Comments: 2400
+2025-06-23 16:42:07,659 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:07,660 - __main__ - INFO -   Sentiment distribution: {'positive': 1490, 'neutral': 600, 'negative': 310}
+2025-06-23 16:42:07,660 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:07,853 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:07,853 - __main__ - INFO -   Runtime: 0:00:07.675082
+2025-06-23 16:42:07,854 - __main__ - INFO -   Messages processed: 2450
+2025-06-23 16:42:07,854 - __main__ - INFO -   Posts: 0, Comments: 2450
+2025-06-23 16:42:07,855 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:07,855 - __main__ - INFO -   Sentiment distribution: {'positive': 1522, 'neutral': 612, 'negative': 316}
+2025-06-23 16:42:07,855 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:08,006 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:08,006 - __main__ - INFO -   Runtime: 0:00:07.827126
+2025-06-23 16:42:08,007 - __main__ - INFO -   Messages processed: 2500
+2025-06-23 16:42:08,007 - __main__ - INFO -   Posts: 0, Comments: 2500
+2025-06-23 16:42:08,008 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:08,008 - __main__ - INFO -   Sentiment distribution: {'positive': 1555, 'neutral': 621, 'negative': 324}
+2025-06-23 16:42:08,009 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:08,213 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:08,214 - __main__ - INFO -   Runtime: 0:00:08.034247
+2025-06-23 16:42:08,215 - __main__ - INFO -   Messages processed: 2550
+2025-06-23 16:42:08,215 - __main__ - INFO -   Posts: 0, Comments: 2550
+2025-06-23 16:42:08,215 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:08,216 - __main__ - INFO -   Sentiment distribution: {'positive': 1588, 'neutral': 627, 'negative': 335}
+2025-06-23 16:42:08,216 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:08,364 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:08,364 - __main__ - INFO -   Runtime: 0:00:08.185250
+2025-06-23 16:42:08,365 - __main__ - INFO -   Messages processed: 2600
+2025-06-23 16:42:08,365 - __main__ - INFO -   Posts: 0, Comments: 2600
+2025-06-23 16:42:08,365 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:08,365 - __main__ - INFO -   Sentiment distribution: {'positive': 1612, 'neutral': 638, 'negative': 350}
+2025-06-23 16:42:08,367 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:08,516 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:08,517 - __main__ - INFO -   Runtime: 0:00:08.337555
+2025-06-23 16:42:08,517 - __main__ - INFO -   Messages processed: 2650
+2025-06-23 16:42:08,518 - __main__ - INFO -   Posts: 0, Comments: 2650
+2025-06-23 16:42:08,518 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:08,518 - __main__ - INFO -   Sentiment distribution: {'positive': 1637, 'neutral': 655, 'negative': 358}
+2025-06-23 16:42:08,519 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:08,651 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:08,652 - __main__ - INFO -   Runtime: 0:00:08.472540
+2025-06-23 16:42:08,653 - __main__ - INFO -   Messages processed: 2700
+2025-06-23 16:42:08,653 - __main__ - INFO -   Posts: 0, Comments: 2700
+2025-06-23 16:42:08,654 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:08,654 - __main__ - INFO -   Sentiment distribution: {'positive': 1671, 'neutral': 666, 'negative': 363}
+2025-06-23 16:42:08,655 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:08,762 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:08,763 - __main__ - INFO -   Runtime: 0:00:08.583566
+2025-06-23 16:42:08,763 - __main__ - INFO -   Messages processed: 2750
+2025-06-23 16:42:08,764 - __main__ - INFO -   Posts: 0, Comments: 2750
+2025-06-23 16:42:08,764 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:08,765 - __main__ - INFO -   Sentiment distribution: {'positive': 1715, 'neutral': 672, 'negative': 363}
+2025-06-23 16:42:08,765 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:08,880 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:08,881 - __main__ - INFO -   Runtime: 0:00:08.701967
+2025-06-23 16:42:08,881 - __main__ - INFO -   Messages processed: 2800
+2025-06-23 16:42:08,882 - __main__ - INFO -   Posts: 0, Comments: 2800
+2025-06-23 16:42:08,882 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:08,883 - __main__ - INFO -   Sentiment distribution: {'positive': 1749, 'neutral': 685, 'negative': 366}
+2025-06-23 16:42:08,883 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:09,020 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:09,022 - __main__ - INFO -   Runtime: 0:00:08.841809
+2025-06-23 16:42:09,022 - __main__ - INFO -   Messages processed: 2850
+2025-06-23 16:42:09,022 - __main__ - INFO -   Posts: 0, Comments: 2850
+2025-06-23 16:42:09,022 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:09,023 - __main__ - INFO -   Sentiment distribution: {'positive': 1784, 'neutral': 692, 'negative': 374}
+2025-06-23 16:42:09,023 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:09,188 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:09,188 - __main__ - INFO -   Runtime: 0:00:09.008670
+2025-06-23 16:42:09,189 - __main__ - INFO -   Messages processed: 2900
+2025-06-23 16:42:09,189 - __main__ - INFO -   Posts: 0, Comments: 2900
+2025-06-23 16:42:09,190 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:09,190 - __main__ - INFO -   Sentiment distribution: {'positive': 1821, 'neutral': 700, 'negative': 379}
+2025-06-23 16:42:09,190 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:09,335 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:09,336 - __main__ - INFO -   Runtime: 0:00:09.156669
+2025-06-23 16:42:09,337 - __main__ - INFO -   Messages processed: 2950
+2025-06-23 16:42:09,337 - __main__ - INFO -   Posts: 0, Comments: 2950
+2025-06-23 16:42:09,337 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:09,338 - __main__ - INFO -   Sentiment distribution: {'positive': 1852, 'neutral': 716, 'negative': 382}
+2025-06-23 16:42:09,338 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:09,504 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:09,505 - __main__ - INFO -   Runtime: 0:00:09.326096
+2025-06-23 16:42:09,505 - __main__ - INFO -   Messages processed: 3000
+2025-06-23 16:42:09,506 - __main__ - INFO -   Posts: 0, Comments: 3000
+2025-06-23 16:42:09,506 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:09,507 - __main__ - INFO -   Sentiment distribution: {'positive': 1893, 'neutral': 723, 'negative': 384}
+2025-06-23 16:42:09,507 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:09,659 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:09,660 - __main__ - INFO -   Runtime: 0:00:09.481095
+2025-06-23 16:42:09,660 - __main__ - INFO -   Messages processed: 3050
+2025-06-23 16:42:09,661 - __main__ - INFO -   Posts: 0, Comments: 3050
+2025-06-23 16:42:09,661 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:09,662 - __main__ - INFO -   Sentiment distribution: {'positive': 1922, 'neutral': 738, 'negative': 390}
+2025-06-23 16:42:09,662 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:09,957 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:09,958 - __main__ - INFO -   Runtime: 0:00:09.778532
+2025-06-23 16:42:09,958 - __main__ - INFO -   Messages processed: 3100
+2025-06-23 16:42:09,959 - __main__ - INFO -   Posts: 0, Comments: 3100
+2025-06-23 16:42:09,959 - __main__ - INFO -   Malaysia-related: 284
+2025-06-23 16:42:09,960 - __main__ - INFO -   Sentiment distribution: {'positive': 1960, 'neutral': 741, 'negative': 399}
+2025-06-23 16:42:09,960 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:10,094 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:10,094 - __main__ - INFO -   Runtime: 0:00:09.915421
+2025-06-23 16:42:10,095 - __main__ - INFO -   Messages processed: 3150
+2025-06-23 16:42:10,095 - __main__ - INFO -   Posts: 0, Comments: 3150
+2025-06-23 16:42:10,096 - __main__ - INFO -   Malaysia-related: 299
+2025-06-23 16:42:10,096 - __main__ - INFO -   Sentiment distribution: {'positive': 1983, 'neutral': 754, 'negative': 413}
+2025-06-23 16:42:10,097 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:10,210 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:10,210 - __main__ - INFO -   Runtime: 0:00:10.031419
+2025-06-23 16:42:10,211 - __main__ - INFO -   Messages processed: 3200
+2025-06-23 16:42:10,211 - __main__ - INFO -   Posts: 0, Comments: 3200
+2025-06-23 16:42:10,212 - __main__ - INFO -   Malaysia-related: 299
+2025-06-23 16:42:10,212 - __main__ - INFO -   Sentiment distribution: {'positive': 2006, 'neutral': 770, 'negative': 424}
+2025-06-23 16:42:10,213 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:10,390 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:10,391 - __main__ - INFO -   Runtime: 0:00:10.211445
+2025-06-23 16:42:10,391 - __main__ - INFO -   Messages processed: 3250
+2025-06-23 16:42:10,392 - __main__ - INFO -   Posts: 0, Comments: 3250
+2025-06-23 16:42:10,392 - __main__ - INFO -   Malaysia-related: 299
+2025-06-23 16:42:10,393 - __main__ - INFO -   Sentiment distribution: {'positive': 2037, 'neutral': 781, 'negative': 432}
+2025-06-23 16:42:10,393 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:10,554 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:10,555 - __main__ - INFO -   Runtime: 0:00:10.375421
+2025-06-23 16:42:10,555 - __main__ - INFO -   Messages processed: 3300
+2025-06-23 16:42:10,555 - __main__ - INFO -   Posts: 0, Comments: 3300
+2025-06-23 16:42:10,556 - __main__ - INFO -   Malaysia-related: 299
+2025-06-23 16:42:10,556 - __main__ - INFO -   Sentiment distribution: {'positive': 2063, 'neutral': 785, 'negative': 452}
+2025-06-23 16:42:10,557 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:10,715 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:10,716 - __main__ - INFO -   Runtime: 0:00:10.536422
+2025-06-23 16:42:10,717 - __main__ - INFO -   Messages processed: 3350
+2025-06-23 16:42:10,717 - __main__ - INFO -   Posts: 0, Comments: 3350
+2025-06-23 16:42:10,718 - __main__ - INFO -   Malaysia-related: 302
+2025-06-23 16:42:10,718 - __main__ - INFO -   Sentiment distribution: {'positive': 2087, 'neutral': 793, 'negative': 470}
+2025-06-23 16:42:10,719 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:10,912 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:10,913 - __main__ - INFO -   Runtime: 0:00:10.733349
+2025-06-23 16:42:10,913 - __main__ - INFO -   Messages processed: 3400
+2025-06-23 16:42:10,914 - __main__ - INFO -   Posts: 0, Comments: 3400
+2025-06-23 16:42:10,914 - __main__ - INFO -   Malaysia-related: 302
+2025-06-23 16:42:10,915 - __main__ - INFO -   Sentiment distribution: {'positive': 2130, 'neutral': 799, 'negative': 471}
+2025-06-23 16:42:10,915 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:11,053 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:11,053 - __main__ - INFO -   Runtime: 0:00:10.873321
+2025-06-23 16:42:11,054 - __main__ - INFO -   Messages processed: 3450
+2025-06-23 16:42:11,054 - __main__ - INFO -   Posts: 0, Comments: 3450
+2025-06-23 16:42:11,054 - __main__ - INFO -   Malaysia-related: 324
+2025-06-23 16:42:11,055 - __main__ - INFO -   Sentiment distribution: {'positive': 2158, 'neutral': 816, 'negative': 476}
+2025-06-23 16:42:11,055 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:11,228 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:11,229 - __main__ - INFO -   Runtime: 0:00:11.049469
+2025-06-23 16:42:11,229 - __main__ - INFO -   Messages processed: 3500
+2025-06-23 16:42:11,230 - __main__ - INFO -   Posts: 0, Comments: 3500
+2025-06-23 16:42:11,230 - __main__ - INFO -   Malaysia-related: 374
+2025-06-23 16:42:11,231 - __main__ - INFO -   Sentiment distribution: {'positive': 2172, 'neutral': 839, 'negative': 489}
+2025-06-23 16:42:11,231 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:11,347 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:11,348 - __main__ - INFO -   Runtime: 0:00:11.168459
+2025-06-23 16:42:11,349 - __main__ - INFO -   Messages processed: 3550
+2025-06-23 16:42:11,349 - __main__ - INFO -   Posts: 0, Comments: 3550
+2025-06-23 16:42:11,350 - __main__ - INFO -   Malaysia-related: 424
+2025-06-23 16:42:11,350 - __main__ - INFO -   Sentiment distribution: {'positive': 2198, 'neutral': 849, 'negative': 503}
+2025-06-23 16:42:11,351 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:11,548 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:11,549 - __main__ - INFO -   Runtime: 0:00:11.369488
+2025-06-23 16:42:11,549 - __main__ - INFO -   Messages processed: 3600
+2025-06-23 16:42:11,550 - __main__ - INFO -   Posts: 0, Comments: 3600
+2025-06-23 16:42:11,550 - __main__ - INFO -   Malaysia-related: 474
+2025-06-23 16:42:11,551 - __main__ - INFO -   Sentiment distribution: {'positive': 2226, 'neutral': 861, 'negative': 513}
+2025-06-23 16:42:11,551 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:11,652 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:11,653 - __main__ - INFO -   Runtime: 0:00:11.473465
+2025-06-23 16:42:11,654 - __main__ - INFO -   Messages processed: 3650
+2025-06-23 16:42:11,654 - __main__ - INFO -   Posts: 0, Comments: 3650
+2025-06-23 16:42:11,654 - __main__ - INFO -   Malaysia-related: 524
+2025-06-23 16:42:11,655 - __main__ - INFO -   Sentiment distribution: {'positive': 2242, 'neutral': 882, 'negative': 526}
+2025-06-23 16:42:11,655 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:11,771 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:11,772 - __main__ - INFO -   Runtime: 0:00:11.592461
+2025-06-23 16:42:11,772 - __main__ - INFO -   Messages processed: 3700
+2025-06-23 16:42:11,772 - __main__ - INFO -   Posts: 0, Comments: 3700
+2025-06-23 16:42:11,773 - __main__ - INFO -   Malaysia-related: 574
+2025-06-23 16:42:11,773 - __main__ - INFO -   Sentiment distribution: {'positive': 2265, 'neutral': 899, 'negative': 536}
+2025-06-23 16:42:11,774 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:11,904 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:11,905 - __main__ - INFO -   Runtime: 0:00:11.725470
+2025-06-23 16:42:11,905 - __main__ - INFO -   Messages processed: 3750
+2025-06-23 16:42:11,905 - __main__ - INFO -   Posts: 0, Comments: 3750
+2025-06-23 16:42:11,906 - __main__ - INFO -   Malaysia-related: 624
+2025-06-23 16:42:11,906 - __main__ - INFO -   Sentiment distribution: {'positive': 2295, 'neutral': 913, 'negative': 542}
+2025-06-23 16:42:11,907 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:12,082 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:12,082 - __main__ - INFO -   Runtime: 0:00:11.903414
+2025-06-23 16:42:12,083 - __main__ - INFO -   Messages processed: 3800
+2025-06-23 16:42:12,083 - __main__ - INFO -   Posts: 0, Comments: 3800
+2025-06-23 16:42:12,084 - __main__ - INFO -   Malaysia-related: 674
+2025-06-23 16:42:12,084 - __main__ - INFO -   Sentiment distribution: {'positive': 2336, 'neutral': 920, 'negative': 544}
+2025-06-23 16:42:12,085 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:12,263 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:12,263 - __main__ - INFO -   Runtime: 0:00:12.083385
+2025-06-23 16:42:12,264 - __main__ - INFO -   Messages processed: 3850
+2025-06-23 16:42:12,264 - __main__ - INFO -   Posts: 0, Comments: 3850
+2025-06-23 16:42:12,264 - __main__ - INFO -   Malaysia-related: 716
+2025-06-23 16:42:12,265 - __main__ - INFO -   Sentiment distribution: {'positive': 2377, 'neutral': 924, 'negative': 549}
+2025-06-23 16:42:12,265 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:12,461 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:12,461 - __main__ - INFO -   Runtime: 0:00:12.281384
+2025-06-23 16:42:12,462 - __main__ - INFO -   Messages processed: 3900
+2025-06-23 16:42:12,462 - __main__ - INFO -   Posts: 0, Comments: 3900
+2025-06-23 16:42:12,462 - __main__ - INFO -   Malaysia-related: 730
+2025-06-23 16:42:12,463 - __main__ - INFO -   Sentiment distribution: {'positive': 2411, 'neutral': 937, 'negative': 552}
+2025-06-23 16:42:12,463 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:12,611 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:12,611 - __main__ - INFO -   Runtime: 0:00:12.432577
+2025-06-23 16:42:12,612 - __main__ - INFO -   Messages processed: 3950
+2025-06-23 16:42:12,612 - __main__ - INFO -   Posts: 0, Comments: 3950
+2025-06-23 16:42:12,613 - __main__ - INFO -   Malaysia-related: 747
+2025-06-23 16:42:12,613 - __main__ - INFO -   Sentiment distribution: {'positive': 2443, 'neutral': 952, 'negative': 555}
+2025-06-23 16:42:12,614 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:12,839 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:12,840 - __main__ - INFO -   Runtime: 0:00:12.660556
+2025-06-23 16:42:12,840 - __main__ - INFO -   Messages processed: 4000
+2025-06-23 16:42:12,841 - __main__ - INFO -   Posts: 0, Comments: 4000
+2025-06-23 16:42:12,841 - __main__ - INFO -   Malaysia-related: 777
+2025-06-23 16:42:12,842 - __main__ - INFO -   Sentiment distribution: {'positive': 2479, 'neutral': 965, 'negative': 556}
+2025-06-23 16:42:12,842 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:13,044 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:13,044 - __main__ - INFO -   Runtime: 0:00:12.865589
+2025-06-23 16:42:13,045 - __main__ - INFO -   Messages processed: 4050
+2025-06-23 16:42:13,045 - __main__ - INFO -   Posts: 0, Comments: 4050
+2025-06-23 16:42:13,046 - __main__ - INFO -   Malaysia-related: 803
+2025-06-23 16:42:13,046 - __main__ - INFO -   Sentiment distribution: {'positive': 2520, 'neutral': 974, 'negative': 556}
+2025-06-23 16:42:13,047 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:13,269 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:13,270 - __main__ - INFO -   Runtime: 0:00:13.090623
+2025-06-23 16:42:13,271 - __main__ - INFO -   Messages processed: 4100
+2025-06-23 16:42:13,271 - __main__ - INFO -   Posts: 0, Comments: 4100
+2025-06-23 16:42:13,271 - __main__ - INFO -   Malaysia-related: 817
+2025-06-23 16:42:13,272 - __main__ - INFO -   Sentiment distribution: {'positive': 2560, 'neutral': 981, 'negative': 559}
+2025-06-23 16:42:13,272 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:13,396 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:13,397 - __main__ - INFO -   Runtime: 0:00:13.217623
+2025-06-23 16:42:13,398 - __main__ - INFO -   Messages processed: 4150
+2025-06-23 16:42:13,398 - __main__ - INFO -   Posts: 0, Comments: 4150
+2025-06-23 16:42:13,398 - __main__ - INFO -   Malaysia-related: 837
+2025-06-23 16:42:13,399 - __main__ - INFO -   Sentiment distribution: {'positive': 2596, 'neutral': 991, 'negative': 563}
+2025-06-23 16:42:13,399 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:13,592 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:13,593 - __main__ - INFO -   Runtime: 0:00:13.413891
+2025-06-23 16:42:13,593 - __main__ - INFO -   Messages processed: 4200
+2025-06-23 16:42:13,594 - __main__ - INFO -   Posts: 0, Comments: 4200
+2025-06-23 16:42:13,594 - __main__ - INFO -   Malaysia-related: 860
+2025-06-23 16:42:13,595 - __main__ - INFO -   Sentiment distribution: {'positive': 2626, 'neutral': 1006, 'negative': 568}
+2025-06-23 16:42:13,595 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:13,751 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:13,751 - __main__ - INFO -   Runtime: 0:00:13.572870
+2025-06-23 16:42:13,752 - __main__ - INFO -   Messages processed: 4250
+2025-06-23 16:42:13,752 - __main__ - INFO -   Posts: 0, Comments: 4250
+2025-06-23 16:42:13,753 - __main__ - INFO -   Malaysia-related: 865
+2025-06-23 16:42:13,753 - __main__ - INFO -   Sentiment distribution: {'positive': 2663, 'neutral': 1015, 'negative': 572}
+2025-06-23 16:42:13,754 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:13,886 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:13,886 - __main__ - INFO -   Runtime: 0:00:13.707893
+2025-06-23 16:42:13,887 - __main__ - INFO -   Messages processed: 4300
+2025-06-23 16:42:13,887 - __main__ - INFO -   Posts: 0, Comments: 4300
+2025-06-23 16:42:13,887 - __main__ - INFO -   Malaysia-related: 872
+2025-06-23 16:42:13,888 - __main__ - INFO -   Sentiment distribution: {'positive': 2692, 'neutral': 1031, 'negative': 577}
+2025-06-23 16:42:13,888 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:14,015 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:14,015 - __main__ - INFO -   Runtime: 0:00:13.836865
+2025-06-23 16:42:14,016 - __main__ - INFO -   Messages processed: 4350
+2025-06-23 16:42:14,016 - __main__ - INFO -   Posts: 0, Comments: 4350
+2025-06-23 16:42:14,017 - __main__ - INFO -   Malaysia-related: 884
+2025-06-23 16:42:14,017 - __main__ - INFO -   Sentiment distribution: {'positive': 2728, 'neutral': 1042, 'negative': 580}
+2025-06-23 16:42:14,017 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:14,106 - __main__ - INFO - 📄 Processing file: malaysia_tourism_posts_20250623_162425.jsonl
+2025-06-23 16:42:14,170 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:14,171 - __main__ - INFO -   Runtime: 0:00:13.991891
+2025-06-23 16:42:14,171 - __main__ - INFO -   Messages processed: 4400
+2025-06-23 16:42:14,172 - __main__ - INFO -   Posts: 21, Comments: 4379
+2025-06-23 16:42:14,172 - __main__ - INFO -   Malaysia-related: 900
+2025-06-23 16:42:14,173 - __main__ - INFO -   Sentiment distribution: {'positive': 2759, 'neutral': 1051, 'negative': 590}
+2025-06-23 16:42:14,173 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:14,519 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:14,520 - __main__ - INFO -   Runtime: 0:00:14.340863
+2025-06-23 16:42:14,521 - __main__ - INFO -   Messages processed: 4450
+2025-06-23 16:42:14,521 - __main__ - INFO -   Posts: 71, Comments: 4379
+2025-06-23 16:42:14,522 - __main__ - INFO -   Malaysia-related: 903
+2025-06-23 16:42:14,522 - __main__ - INFO -   Sentiment distribution: {'positive': 2794, 'neutral': 1059, 'negative': 597}
+2025-06-23 16:42:14,523 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:14,856 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:14,856 - __main__ - INFO -   Runtime: 0:00:14.677916
+2025-06-23 16:42:14,857 - __main__ - INFO -   Messages processed: 4500
+2025-06-23 16:42:14,857 - __main__ - INFO -   Posts: 121, Comments: 4379
+2025-06-23 16:42:14,858 - __main__ - INFO -   Malaysia-related: 906
+2025-06-23 16:42:14,858 - __main__ - INFO -   Sentiment distribution: {'positive': 2839, 'neutral': 1060, 'negative': 601}
+2025-06-23 16:42:14,859 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:15,145 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:15,146 - __main__ - INFO -   Runtime: 0:00:14.966538
+2025-06-23 16:42:15,146 - __main__ - INFO -   Messages processed: 4550
+2025-06-23 16:42:15,147 - __main__ - INFO -   Posts: 171, Comments: 4379
+2025-06-23 16:42:15,147 - __main__ - INFO -   Malaysia-related: 908
+2025-06-23 16:42:15,148 - __main__ - INFO -   Sentiment distribution: {'positive': 2869, 'neutral': 1075, 'negative': 606}
+2025-06-23 16:42:15,148 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:15,431 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:15,432 - __main__ - INFO -   Runtime: 0:00:15.253029
+2025-06-23 16:42:15,432 - __main__ - INFO -   Messages processed: 4600
+2025-06-23 16:42:15,433 - __main__ - INFO -   Posts: 221, Comments: 4379
+2025-06-23 16:42:15,433 - __main__ - INFO -   Malaysia-related: 921
+2025-06-23 16:42:15,434 - __main__ - INFO -   Sentiment distribution: {'positive': 2892, 'neutral': 1092, 'negative': 616}
+2025-06-23 16:42:15,434 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:15,749 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:15,750 - __main__ - INFO -   Runtime: 0:00:15.571044
+2025-06-23 16:42:15,750 - __main__ - INFO -   Messages processed: 4650
+2025-06-23 16:42:15,751 - __main__ - INFO -   Posts: 271, Comments: 4379
+2025-06-23 16:42:15,751 - __main__ - INFO -   Malaysia-related: 923
+2025-06-23 16:42:15,752 - __main__ - INFO -   Sentiment distribution: {'positive': 2921, 'neutral': 1105, 'negative': 624}
+2025-06-23 16:42:15,752 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:16,328 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:16,330 - __main__ - INFO -   Runtime: 0:00:16.150151
+2025-06-23 16:42:16,330 - __main__ - INFO -   Messages processed: 4700
+2025-06-23 16:42:16,330 - __main__ - INFO -   Posts: 321, Comments: 4379
+2025-06-23 16:42:16,331 - __main__ - INFO -   Malaysia-related: 924
+2025-06-23 16:42:16,331 - __main__ - INFO -   Sentiment distribution: {'positive': 2958, 'neutral': 1111, 'negative': 631}
+2025-06-23 16:42:16,332 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:16,782 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:16,784 - __main__ - INFO -   Runtime: 0:00:16.604152
+2025-06-23 16:42:16,784 - __main__ - INFO -   Messages processed: 4750
+2025-06-23 16:42:16,784 - __main__ - INFO -   Posts: 371, Comments: 4379
+2025-06-23 16:42:16,784 - __main__ - INFO -   Malaysia-related: 953
+2025-06-23 16:42:16,785 - __main__ - INFO -   Sentiment distribution: {'positive': 2987, 'neutral': 1126, 'negative': 637}
+2025-06-23 16:42:16,785 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:17,302 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:17,303 - __main__ - INFO -   Runtime: 0:00:17.123472
+2025-06-23 16:42:17,303 - __main__ - INFO -   Messages processed: 4800
+2025-06-23 16:42:17,304 - __main__ - INFO -   Posts: 421, Comments: 4379
+2025-06-23 16:42:17,305 - __main__ - INFO -   Malaysia-related: 996
+2025-06-23 16:42:17,305 - __main__ - INFO -   Sentiment distribution: {'positive': 3025, 'neutral': 1128, 'negative': 647}
+2025-06-23 16:42:17,306 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:17,386 - __main__ - INFO - ✅ File processing completed! Processed 4807 messages
+2025-06-23 16:42:17,389 - __main__ - ERROR - Failed to save analytics report: Object of type datetime is not JSON serializable
+2025-06-23 16:42:17,390 - __main__ - INFO - 📊 PROCESSING PROGRESS
+2025-06-23 16:42:17,391 - __main__ - INFO -   Runtime: 0:00:17.211475
+2025-06-23 16:42:17,391 - __main__ - INFO -   Messages processed: 4807
+2025-06-23 16:42:17,392 - __main__ - INFO -   Posts: 428, Comments: 4379
+2025-06-23 16:42:17,392 - __main__ - INFO -   Malaysia-related: 1002
+2025-06-23 16:42:17,393 - __main__ - INFO -   Sentiment distribution: {'positive': 3030, 'neutral': 1129, 'negative': 648}
+2025-06-23 16:42:17,395 - __main__ - INFO -   Processing errors: 0
+2025-06-23 16:42:17,395 - __main__ - INFO - ✅ SENTIMENT ANALYSIS COMPLETED!
+2025-06-23 16:42:17,396 - __main__ - INFO - 📊 Total processed: 4807 messages
+2025-06-23 16:42:17,396 - __main__ - INFO - 🇲🇾 Malaysia-related: 1002
+2025-06-23 16:42:17,397 - __main__ - INFO - 📈 Sentiment distribution: {'positive': 3030, 'neutral': 1129, 'negative': 648}
+2025-06-23 16:42:17,397 - __main__ - INFO - 📁 Results saved to: data/processed/sentiment_analysis_20250623_164200.jsonl
+2025-06-23 16:42:17,399 - __main__ - INFO - 📊 Analytics report: data/analytics/tourism_sentiment_report_20250623_164200.json
+2025-06-23 16:42:17,402 - __main__ - INFO - 🔚 Consumer shutdown complete
