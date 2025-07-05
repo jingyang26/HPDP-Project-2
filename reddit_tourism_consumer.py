@@ -21,6 +21,7 @@ Course Deadline: June 27, 2025
 
 import json
 import time
+import warnings
 import logging
 import os
 import re
@@ -31,15 +32,30 @@ import pandas as pd
 from collections import defaultdict, deque
 import threading
 from pathlib import Path
+import pickle
+import glob
+import csv
+
+# === SUPPRESS ALL WARNINGS ===
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'     # Hide TensorFlow INFO & WARN
+warnings.filterwarnings("ignore")            # Hide Python warnings
+logging.getLogger('tensorflow').setLevel(logging.ERROR)  # Hide TensorFlow logs
 
 # NLP and Sentiment Analysis imports
 try:
     import nltk
-    from textblob import TextBlob
-    from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+    import numpy as np
+    from nltk.corpus import stopwords
+    from nltk.tokenize import word_tokenize, sent_tokenize
+    from nltk.stem import PorterStemmer, WordNetLemmatizer
+    from nltk.tag import pos_tag
+
+    from tensorflow.keras.models import load_model
+    from tensorflow.keras.preprocessing.sequence import pad_sequences
+
     NLP_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️ NLP libraries not available: {e}")
+    print(f"⚠️ NLP or LSTM libraries not available: {e}")
     NLP_AVAILABLE = False
 
 # Try to import Kafka
@@ -69,177 +85,569 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class MalaysianTourismSentimentAnalyzer:
-    """Advanced sentiment analysis for Malaysian tourism content"""
+    """Advanced sentiment analysis using trained Naive Bayes model"""
     
     def __init__(self):
-        """Initialize sentiment analysis models"""
+        """Initialize sentiment analysis with trained model"""
         self.setup_models()
         self.setup_malaysian_context()
-        
+        self.setup_nltk_preprocessing()
+        self.load_trained_model()  # New: Load trained NB model
+        self.lstm_model = None
+        self.lstm_tokenizer = None
+        self.lstm_label_encoder = None
+        self.load_lstm_model()  # Load LSTM model
+    
     def setup_models(self):
-        """Setup sentiment analysis models"""
+        """Setup sentiment analysis models - ML model only"""
         if NLP_AVAILABLE:
-            # Download required NLTK data
+            # Download required NLTK data (keep for preprocessing only)
             try:
                 nltk.download('punkt', quiet=True)
-                nltk.download('vader_lexicon', quiet=True)
                 nltk.download('stopwords', quiet=True)
+                nltk.download('wordnet', quiet=True)
+                nltk.download('averaged_perceptron_tagger', quiet=True)
+                nltk.download('omw-1.4', quiet=True)
+                # nltk.download('vader_lexicon', quiet=True)  # REMOVED - No more VADER
             except:
                 pass
-                
-            # Initialize VADER
-            self.vader = SentimentIntensityAnalyzer()
-            logger.info("✅ Sentiment analysis models initialized")
+            
+            # Remove VADER initialization
+            # self.vader = SentimentIntensityAnalyzer()  # REMOVED
+            self.vader = None  # Explicitly set to None
+            logger.info("✅ NLTK preprocessing initialized (ML model only)")
         else:
-            logger.warning("⚠️ NLP libraries not available - using basic sentiment analysis")
+            logger.warning("⚠️ NLP libraries not available")
             self.vader = None
     
+    def load_trained_model(self):
+        """Load the trained Naive Bayes model and label encoder (clean, consistent output)"""
+        model_dir = Path('models')
+        self.trained_model = None
+        self.label_encoder = None
+        try:
+            print("\n[Naive Bayes] === Model Loading ===")
+            if not model_dir.exists():
+                print("[Naive Bayes] ❌ Models directory not found!")
+                logger.warning("[Naive Bayes] Models directory not found. Train model first.")
+                return
+            tuned_models = sorted(model_dir.glob('naive_bayes_tuned_model_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
+            best_models = sorted(model_dir.glob('naive_bayes_best_model_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
+            model_path = tuned_models[0] if tuned_models else (best_models[0] if best_models else None)
+            if not model_path:
+                print("[Naive Bayes] ❌ No trained model found!")
+                logger.warning("[Naive Bayes] No trained models found. Train model first.")
+                return
+            print(f"[Naive Bayes] Model file: {model_path.name}")
+            with open(model_path, 'rb') as f:
+                self.trained_model = pickle.load(f)
+            parts = model_path.stem.split('_')
+            timestamp = f"{parts[-2]}_{parts[-1]}" if len(parts) >= 2 else parts[-1]
+            label_encoder_path = model_dir / f'label_encoder_{timestamp}.pkl'
+            if not label_encoder_path.exists():
+                label_files = sorted(model_dir.glob('label_encoder_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
+                label_encoder_path = label_files[0] if label_files else None
+            if label_encoder_path and label_encoder_path.exists():
+                with open(label_encoder_path, 'rb') as f:
+                    self.label_encoder = pickle.load(f)
+                print(f"[Naive Bayes] ✅ Loaded model: {model_path.name}")
+                print(f"[Naive Bayes] ✅ Loaded label encoder: {label_encoder_path.name}")
+                logger.info(f"[Naive Bayes] Model and label encoder loaded: {model_path.name}, {label_encoder_path.name}")
+            else:
+                print("[Naive Bayes] ❌ Label encoder not found!")
+                logger.warning("[Naive Bayes] Label encoder not found. Train model first.")
+                self.trained_model = None
+                self.label_encoder = None
+        except Exception as e:
+            print(f"[Naive Bayes] ❌ Error loading model: {e}")
+            logger.error(f"[Naive Bayes] Failed to load model: {e}")
+            self.trained_model = None
+            self.label_encoder = None
+
+    def load_lstm_model(self):
+        """Load the trained LSTM model, tokenizer, and label encoder (clean, consistent output)"""
+        model_dir = Path('models')
+        self.lstm_model = None
+        self.lstm_tokenizer = None
+        self.lstm_label_encoder = None
+        try:
+            print("\n[LSTM] === Model Loading ===")
+            if not model_dir.exists():
+                print("[LSTM] ❌ Models directory not found!")
+                logger.warning("[LSTM] Models directory not found. Train model first.")
+                return
+            lstm_models = sorted(model_dir.glob('lstm_model_*.h5'), key=lambda p: p.stat().st_mtime, reverse=True)
+            if not lstm_models:
+                print("[LSTM] ❌ No LSTM model files found!")
+                logger.warning("[LSTM] No LSTM model files found. Train model first.")
+                return
+            model_path = lstm_models[0]
+            print(f"[LSTM] Model file: {model_path.name}")
+            parts = model_path.stem.split('_')
+            timestamp = f"{parts[-2]}_{parts[-1]}" if len(parts) >= 2 else parts[-1]
+            tokenizer_path = model_dir / f"tokenizer_{timestamp}.pkl"
+            label_encoder_path = model_dir / f"label_encoder_{timestamp}.pkl"
+            if not tokenizer_path.exists() or not label_encoder_path.exists():
+                tokenizer_files = sorted(model_dir.glob('tokenizer_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
+                label_files = sorted(model_dir.glob('label_encoder_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
+                tokenizer_path = tokenizer_files[0] if tokenizer_files else None
+                label_encoder_path = label_files[0] if label_files else None
+            if tokenizer_path and label_encoder_path and tokenizer_path.exists() and label_encoder_path.exists():
+                with open(tokenizer_path, "rb") as f:
+                    self.lstm_tokenizer = pickle.load(f)
+                with open(label_encoder_path, "rb") as f:
+                    self.lstm_label_encoder = pickle.load(f)
+                from tensorflow.keras.models import load_model
+                self.lstm_model = load_model(model_path)
+                print(f"[LSTM] ✅ Loaded model: {model_path.name}")
+                print(f"[LSTM] ✅ Loaded tokenizer: {tokenizer_path.name}")
+                print(f"[LSTM] ✅ Loaded label encoder: {label_encoder_path.name}")
+                logger.info(f"[LSTM] Model, tokenizer, and label encoder loaded: {model_path.name}, {tokenizer_path.name}, {label_encoder_path.name}")
+            else:
+                print("[LSTM] ❌ Tokenizer or label encoder not found!")
+                logger.warning("[LSTM] Tokenizer or label encoder not found. Train model first.")
+                self.lstm_model = None
+                self.lstm_tokenizer = None
+                self.lstm_label_encoder = None
+        except Exception as e:
+            print(f"[LSTM] ❌ Error loading model: {e}")
+            logger.error(f"[LSTM] Failed to load model: {e}")
+            self.lstm_model = None
+            self.lstm_tokenizer = None
+            self.lstm_label_encoder = None
+    
     def setup_malaysian_context(self):
-        """Setup Malaysian tourism-specific sentiment context"""
-        # Positive Malaysian tourism keywords
-        self.positive_keywords = {
-            'amazing', 'beautiful', 'stunning', 'incredible', 'wonderful', 'fantastic',
-            'delicious', 'friendly', 'helpful', 'clean', 'safe', 'affordable',
-            'recommend', 'must-visit', 'love', 'enjoy', 'perfect', 'excellent',
-            'cheap', 'budget-friendly', 'value', 'worth', 'authentic', 'cultural'
-        }
-        
-        # Negative Malaysian tourism keywords
-        self.negative_keywords = {
-            'expensive', 'overpriced', 'dirty', 'crowded', 'tourist-trap', 'scam',
-            'disappointed', 'terrible', 'awful', 'bad', 'worst', 'avoid',
-            'unsafe', 'rude', 'unfriendly', 'boring', 'waste', 'overrated'
-        }
-        
-        # Malaysian context boosters
+        """Setup Malaysian tourism-specific context (reduced, model-based approach)"""
+        # Keep only Malaysian location boosters for context enhancement
         self.malaysian_boosters = {
-            'nasi lemak': 0.3, 'rendang': 0.3, 'char kway teow': 0.2,
             'petronas towers': 0.4, 'batu caves': 0.3, 'langkawi': 0.4,
             'penang': 0.4, 'malacca': 0.3, 'cameron highlands': 0.3,
-            'truly asia': 0.5, 'malaysia boleh': 0.4
+            'truly asia': 0.5, 'malaysia boleh': 0.4,
+            'kuala lumpur': 0.3, 'kl': 0.3, 'johor bahru': 0.2,
+            'sabah': 0.3, 'sarawak': 0.3, 'borneo': 0.3
+        }
+        
+        # Remove hardcoded positive/negative keywords - let the model decide!
+        # self.positive_keywords = {}  # REMOVED
+        # self.negative_keywords = {}  # REMOVED
+        
+        logger.info("✅ Malaysian context setup (model-based sentiment)")
+    
+    def setup_nltk_preprocessing(self):
+        """Setup NLTK preprocessing tools"""
+        if NLP_AVAILABLE:
+            # Initialize NLTK tools
+            self.stemmer = PorterStemmer()
+            self.lemmatizer = WordNetLemmatizer()
+            
+            # Load stopwords for multiple languages
+            try:
+                self.english_stopwords = set(stopwords.words('english'))
+                # Add custom tourism-specific stopwords
+                custom_stopwords = {
+                    'malaysia', 'malaysian', 'kuala', 'lumpur', 'kl', 'penang', 'langkawi',
+                    'go', 'going', 'went', 'visit', 'visiting', 'visited', 'trip', 'travel',
+                    'place', 'places', 'time', 'day', 'days', 'week', 'month', 'year',
+                    'like', 'would', 'could', 'should', 'really', 'also', 'get', 'got'
+                }
+                self.stopwords = self.english_stopwords.union(custom_stopwords)
+                logger.info(f"✅ NLTK preprocessing initialized with {len(self.stopwords)} stopwords")
+            except:
+                self.stopwords = set()
+                logger.warning("⚠️ Could not load stopwords")
+        else:
+            self.stemmer = None
+            self.lemmatizer = None
+            self.stopwords = set()
+    def extract_linguistic_features(self, text_preprocessing, title_preprocessing):
+        """Basic linguistic feature extraction (placeholder)"""
+        return {
+            'total_tokens': text_preprocessing.get('token_count', 0) + title_preprocessing.get('token_count', 0),
+            'processed_tokens': text_preprocessing.get('processed_count', 0) + title_preprocessing.get('processed_count', 0),
+            'text_length': len(text_preprocessing.get('original', "")) + len(title_preprocessing.get('original', ""))
+        }
+    
+    def preprocess_text(self, text: str, use_stemming: bool = False, use_lemmatization: bool = True) -> Dict:
+        """Advanced text preprocessing using NLTK"""
+        if not text or not NLP_AVAILABLE:
+            return {
+                'original': text,
+                'cleaned': text.lower() if text else '',
+                'tokens': [],
+                'processed_tokens': [],
+                'processed_text': text.lower() if text else '',
+                'token_count': 0,
+                'filtered_count': 0,
+                'processed_count': 0
+            }
+        
+        # Store original text
+        original_text = text
+        
+        # 1. Basic cleaning
+        cleaned_text = self.basic_text_cleaning(text)
+        
+        # 2. Tokenization
+        tokens = word_tokenize(cleaned_text.lower())
+        
+        # 3. Remove punctuation and non-alphabetic tokens
+        alpha_tokens = [token for token in tokens if token.isalpha() and len(token) > 2]
+        
+        # 4. Stopword removal
+        filtered_tokens = [token for token in alpha_tokens if token not in self.stopwords]
+        
+        # 5. POS tagging for better lemmatization
+        pos_tagged = pos_tag(filtered_tokens) if filtered_tokens else []
+        
+        # 6. Stemming or Lemmatization
+        processed_tokens = []
+        if use_lemmatization and self.lemmatizer:
+            for word, pos in pos_tagged:
+                # Convert POS tag to WordNet format
+                wordnet_pos = self.get_wordnet_pos(pos)
+                lemmatized = self.lemmatizer.lemmatize(word, wordnet_pos)
+                processed_tokens.append(lemmatized)
+        elif use_stemming and self.stemmer:
+            processed_tokens = [self.stemmer.stem(token) for token, _ in pos_tagged]
+        else:
+            processed_tokens = [token for token, _ in pos_tagged]
+        
+        # 7. Create processed text
+        processed_text = ' '.join(processed_tokens)
+        
+        return {
+            'original': original_text,
+            'cleaned': cleaned_text,
+            'tokens': tokens,
+            'filtered_tokens': filtered_tokens,
+            'pos_tagged': pos_tagged,
+            'processed_tokens': processed_tokens,
+            'processed_text': processed_text,
+            'token_count': len(tokens),
+            'filtered_count': len(filtered_tokens),
+            'processed_count': len(processed_tokens)
+        }
+    
+    def basic_text_cleaning(self, text: str) -> str:
+        """Basic text cleaning before tokenization"""
+        if not text:
+            return ""
+        
+        # Remove URLs
+        text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
+        
+        # Remove Reddit-specific patterns
+        text = re.sub(r'/u/\w+', '', text)  # Remove username mentions
+        text = re.sub(r'/r/\w+', '', text)  # Remove subreddit mentions
+        text = re.sub(r'\[deleted\]|\[removed\]', '', text)  # Remove deleted content markers
+        
+        # Remove extra whitespace
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
+        
+        return text
+    
+    def get_wordnet_pos(self, treebank_tag: str) -> str:
+        """Convert TreeBank POS tags to WordNet format for better lemmatization"""
+        if treebank_tag.startswith('J'):
+            return 'a'  # adjective
+        elif treebank_tag.startswith('V'):
+            return 'v'  # verb
+        elif treebank_tag.startswith('N'):
+            return 'n'  # noun
+        elif treebank_tag.startswith('R'):
+            return 'r'  # adverb
+        else:
+            return 'n'  # default to noun
+    
+    def extract_ngrams(self, tokens: List[str], n: int = 2) -> List[str]:
+        """Extract n-grams from tokens for additional feature analysis"""
+        if len(tokens) < n:
+            return []
+        
+        ngrams = []
+        for i in range(len(tokens) - n + 1):
+            ngram = ' '.join(tokens[i:i + n])
+            ngrams.append(ngram)
+        
+        return ngrams
+
+    def analyze_sentiment_with_naive_bayes(self, text: str, title: str = "") -> Dict:
+        """Use trained Naive Bayes model for sentiment analysis"""
+        if not self.trained_model or not self.label_encoder:
+            raise Exception("❌ Trained model not available! Train the model first using: python train_naive_bayes_model.py")
+        
+        try:
+            # FIXED: Don't re-combine title if we already have cleaned comment text
+            # For comments, text should already be cleaned, title should be empty
+            if title:
+                # For posts: combine title and text
+                combined_text = f"{title} {text}".strip()
+            else:
+                # For comments: use only the cleaned text (no title)
+                combined_text = text.strip()
+            
+            print(f"🔍 TEXT GOING TO ML MODEL: {combined_text}")  # Debug output
+            
+            if not combined_text:
+                return {
+                    'sentiment_score': 0.0,
+                    'label': 'neutral',
+                    'confidence': 0.0,
+                    'method': 'trained_model',
+                    'probabilities': {'positive': 0.33, 'negative': 0.33, 'neutral': 0.34}
+                }
+            
+            # Preprocess text using same pipeline as training
+            processed_text = self.preprocess_text(combined_text)
+            
+            print(f"🔍 NLTK PREPROCESSED: {processed_text['processed_text']}")  # Debug output
+            
+            if not processed_text['processed_text']:
+                # If preprocessing results in empty text, use basic cleaning
+                cleaned_text = combined_text.lower().strip()
+                if not cleaned_text:
+                    return {
+                        'sentiment_score': 0.0,
+                        'label': 'neutral', 
+                        'confidence': 0.0,
+                        'method': 'trained_model',
+                        'probabilities': {'positive': 0.33, 'negative': 0.33, 'neutral': 0.34}
+                    }
+                input_text = cleaned_text
+            else:
+                input_text = processed_text['processed_text']
+            
+            print(f"🔍 FINAL INPUT TO ML MODEL: {input_text}")  # Debug output
+            
+            # Get prediction and probabilities
+            prediction = self.trained_model.predict([input_text])[0]
+            probabilities = self.trained_model.predict_proba([input_text])[0]
+            
+            # Map prediction to label
+            predicted_label = self.label_encoder.classes_[prediction]
+            
+            # Create probability dictionary
+            prob_dict = {}
+            for i, label in enumerate(self.label_encoder.classes_):
+                prob_dict[label] = float(probabilities[i])
+            
+            # Calculate sentiment score (-1 to +1)
+            if predicted_label == 'positive':
+                sentiment_score = prob_dict['positive'] - prob_dict['negative']
+            elif predicted_label == 'negative':
+                sentiment_score = prob_dict['negative'] - prob_dict['positive']
+            else:  # neutral
+                sentiment_score = 0.0
+            
+            # Calculate confidence (highest probability)
+            confidence = float(max(probabilities))
+            
+            # Apply Malaysian context boost
+            malaysian_boost = self.get_malaysian_context_boost(combined_text.lower())
+            if malaysian_boost > 0:
+                confidence = min(1.0, confidence + malaysian_boost * 0.1)
+                logger.debug(f"Applied Malaysian boost: {malaysian_boost}")
+            
+            return {
+                'sentiment_score': sentiment_score,
+                'label': predicted_label,
+                'confidence': confidence,
+                'method': 'trained_model',
+                'probabilities': prob_dict,
+                'preprocessing_quality': processed_text.get('processing_quality', 'unknown'),
+                'malaysian_boost': malaysian_boost
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Trained model prediction failed: {e}")
+            raise Exception(f"Sentiment analysis failed: {e}. Ensure trained model is available.")
+        
+    def analyze_sentiment_with_lstm(self, text: str, title: str = "") -> Dict:
+        """Use trained LSTM model for sentiment analysis"""
+        if not self.lstm_model or not self.lstm_tokenizer or not self.lstm_label_encoder:
+            raise Exception("❌ LSTM model not available! Train the model first using: train_lstm_sentiment_model.py")
+
+        # Match Naive Bayes logic: combine title and text for posts, just text for comments
+        if title:
+            combined_text = f"{title} {text}".strip()
+        else:
+            combined_text = text.strip()
+        print(f"🔍 TEXT GOING TO LSTM MODEL: {combined_text}")
+
+        # Use the same preprocessing as Naive Bayes
+        processed_text = self.preprocess_text(combined_text, use_lemmatization=True)
+        print(f"🔍 LSTM NLTK PREPROCESSED: {processed_text['processed_text']}")  # Debug output
+        # Add this line to show the final input to the LSTM model (tokenizer input)
+        print(f"🔍 FINAL INPUT TO LSTM MODEL: {processed_text['processed_text']}")
+        if not processed_text["processed_text"]:
+            return {
+                'sentiment_score': 0.0,
+                'label': 'neutral',
+                'confidence': 0.0,
+                'method': 'lstm_model',
+                'probabilities': {'positive': 0.33, 'negative': 0.33, 'neutral': 0.34}
+            }
+
+        # Use the fully preprocessed text as input to the tokenizer
+        sequence = self.lstm_tokenizer.texts_to_sequences([processed_text["processed_text"]])
+        padded = pad_sequences(sequence, maxlen=100)
+        probabilities = self.lstm_model.predict(padded)[0]
+
+        idx = np.argmax(probabilities)
+        predicted_label = self.lstm_label_encoder.classes_[idx]
+        confidence = float(probabilities[idx])
+        prob_dict = {self.lstm_label_encoder.classes_[i]: float(p) for i, p in enumerate(probabilities)}
+
+        if predicted_label == "positive":
+            sentiment_score = prob_dict["positive"] - prob_dict.get("negative", 0.0)
+        elif predicted_label == "negative":
+            sentiment_score = prob_dict["negative"] - prob_dict.get("positive", 0.0)
+        else:
+            sentiment_score = 0.0
+
+        malaysian_boost = self.get_malaysian_context_boost(combined_text.lower())
+        if malaysian_boost > 0:
+            confidence = min(1.0, confidence + malaysian_boost * 0.1)
+            logger.debug(f"Applied Malaysian boost: {malaysian_boost}")
+
+        return {
+            'sentiment_score': sentiment_score,
+            'label': predicted_label,
+            'confidence': confidence,
+            'method': 'lstm_model',
+            'probabilities': prob_dict,
+            'preprocessing_quality': processed_text.get('processing_quality', 'unknown'),
+            'malaysian_boost': malaysian_boost
+        }
+
+    def get_malaysian_context_boost(self, text: str) -> float:
+        """Calculate Malaysian tourism context boost"""
+        boost = 0.0
+        text_lower = text.lower()
+        
+        for keyword, value in self.malaysian_boosters.items():
+            if keyword in text_lower:
+                boost += value
+        
+        return min(boost, 1.0)  # Cap at 1.0
+
+    def _empty_preprocessing_result(self, text: str) -> Dict:
+        """Return empty preprocessing result for empty/null inputs"""
+        return {
+            'original': text,
+            'cleaned': text.lower() if text else '',
+            'tokens': [],
+            'filtered_tokens': [],
+            'pos_tagged': [],
+            'processed_tokens': [],
+            'processed_text': text.lower() if text else '',
+            'token_count': 0,
+            'filtered_count': 0,
+            'processed_count': 0
         }
     
     def analyze_sentiment(self, text: str, title: str = "") -> Dict:
-        """Perform comprehensive sentiment analysis"""
-        combined_text = f"{title} {text}".lower()
-        
-        results = {
+        """Run both LSTM and Naive Bayes models for every input and return both results"""
+        print(f"\n🔍 ANALYZE_SENTIMENT INPUT - Text: {text[:100]}...")
+        print(f"🔍 ANALYZE_SENTIMENT INPUT - Title: {title}")
+
+        is_comment = not title or title == ""
+        text_preprocessing = self.preprocess_text(text, use_lemmatization=True)
+        title_preprocessing = self._empty_preprocessing_result("") if is_comment else self.preprocess_text(title, use_lemmatization=True)
+
+        # Run both models
+        try:
+            nb_result = self.analyze_sentiment_with_naive_bayes(text, "" if is_comment else title)
+        except Exception as e:
+            nb_result = {'error': str(e)}
+        try:
+            lstm_result = self.analyze_sentiment_with_lstm(text, "" if is_comment else title)
+        except Exception as e:
+            lstm_result = {'error': str(e)}
+
+        # Pick one as final (prefer LSTM if available)
+        if 'error' not in lstm_result:
+            final_sentiment = {
+                'score': lstm_result['sentiment_score'],
+                'label': lstm_result['label'],
+                'confidence': lstm_result['confidence'],
+                'method': lstm_result['method']
+            }
+        elif 'error' not in nb_result:
+            final_sentiment = {
+                'score': nb_result['sentiment_score'],
+                'label': nb_result['label'],
+                'confidence': nb_result['confidence'],
+                'method': nb_result['method']
+            }
+        else:
+            final_sentiment = {'label': 'error', 'score': 0.0, 'confidence': 0.0, 'method': 'none'}
+
+        try:
+            linguistic_features = self.extract_linguistic_features(text_preprocessing, title_preprocessing)
+        except Exception as e:
+            logger.warning(f"Failed to extract linguistic features: {e}")
+            linguistic_features = {
+                'total_tokens': text_preprocessing.get('token_count', 0),
+                'processed_tokens': text_preprocessing.get('processed_count', 0),
+                'text_length': len(text)
+            }
+
+        return {
             'text_length': len(text),
-            'title_length': len(title),
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            'title_length': len(title) if not is_comment else 0,
+            'preprocessing': {
+                'text': text_preprocessing,
+                'title': title_preprocessing,
+                'combined_processed': text_preprocessing['processed_text']
+            },
+            'naive_bayes_result': nb_result,
+            'lstm_result': lstm_result,
+            'linguistic_features': linguistic_features,
+            'final_sentiment': final_sentiment,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'model_info': {
+                'has_trained_model': self.trained_model is not None,
+                'model_classes': list(self.label_encoder.classes_) if self.label_encoder else [],
+                'fallback_used': False
+            }
         }
-        
-        if NLP_AVAILABLE and self.vader:
-            # VADER Sentiment
-            vader_scores = self.vader.polarity_scores(text)
-            results['vader'] = vader_scores
-            
-            # TextBlob Sentiment
-            try:
-                blob = TextBlob(text)
-                results['textblob'] = {
-                    'polarity': blob.sentiment.polarity,
-                    'subjectivity': blob.sentiment.subjectivity
-                }
-            except Exception as e:
-                logger.warning(f"TextBlob analysis failed: {e}")
-                results['textblob'] = {'polarity': 0.0, 'subjectivity': 0.0}
-        else:
-            # Basic sentiment analysis
-            results['vader'] = {'compound': 0.0, 'pos': 0.0, 'neu': 1.0, 'neg': 0.0}
-            results['textblob'] = {'polarity': 0.0, 'subjectivity': 0.0}
-        
-        # Malaysian tourism-specific analysis
-        malaysian_sentiment = self.analyze_malaysian_context(combined_text)
-        results['malaysian_tourism'] = malaysian_sentiment
-        
-        # Combined sentiment score
-        results['final_sentiment'] = self.calculate_final_sentiment(results)
-        
-        return results
-    
-    def analyze_malaysian_context(self, text: str) -> Dict:
-        """Analyze sentiment with Malaysian tourism context"""
-        positive_count = sum(1 for word in self.positive_keywords if word in text)
-        negative_count = sum(1 for word in self.negative_keywords if word in text)
-        
-        # Calculate Malaysian-specific boost
-        malaysian_boost = 0.0
-        for term, boost in self.malaysian_boosters.items():
-            if term in text:
-                malaysian_boost += boost
-        
-        # Calculate context-aware sentiment
-        if positive_count + negative_count > 0:
-            sentiment_ratio = (positive_count - negative_count) / (positive_count + negative_count)
-        else:
-            sentiment_ratio = 0.0
-        
-        # Apply Malaysian boost
-        final_score = sentiment_ratio + (malaysian_boost * 0.1)
-        final_score = max(-1.0, min(1.0, final_score))  # Clamp to [-1, 1]
-        
-        return {
-            'positive_keywords': positive_count,
-            'negative_keywords': negative_count,
-            'malaysian_boost': malaysian_boost,
-            'sentiment_score': final_score,
-            'confidence': min(1.0, (positive_count + negative_count + malaysian_boost) / 10)
-        }
-    
-    def calculate_final_sentiment(self, results: Dict) -> Dict:
-        """Calculate final weighted sentiment score"""
-        # Get individual scores
-        vader_score = results['vader']['compound']
-        textblob_score = results['textblob']['polarity']
-        malaysian_score = results['malaysian_tourism']['sentiment_score']
-        
-        # Weighted combination
-        weights = {
-            'vader': 0.4,
-            'textblob': 0.3,
-            'malaysian': 0.3
-        }
-        
-        final_score = (
-            vader_score * weights['vader'] +
-            textblob_score * weights['textblob'] +
-            malaysian_score * weights['malaysian']
-        )
-        
-        # Classify sentiment
-        if final_score >= 0.1:
-            sentiment_label = 'positive'
-        elif final_score <= -0.1:
-            sentiment_label = 'negative'
-        else:
-            sentiment_label = 'neutral'
-        
-        # Calculate confidence
-        confidence = (
-            abs(final_score) * 0.7 +
-            results['malaysian_tourism']['confidence'] * 0.3
-        )
-        
-        return {
-            'score': final_score,
-            'label': sentiment_label,
-            'confidence': min(1.0, confidence),
-            'weights_used': weights
-        }
+
 
 class MalaysianTourismConsumer:
     """Enhanced Kafka consumer for Malaysian tourism sentiment analysis"""
     
-    def __init__(self):
-        """Initialize consumer with sentiment analysis capabilities"""
+    def __init__(self, bootstrap_servers: str = '127.0.0.1:9092', topic_name: str = 'malaysian-tourism-sentiment', group_id: str = 'sentiment-group'):
+        """Initialize consumer for REAL-TIME streaming only"""
         self.setup_directories()
         self.setup_sentiment_analyzer()
-        self.setup_consumer()
+        
+        # ONLY real-time mode
+        self.bootstrap_servers = bootstrap_servers
+        self.topic_name = topic_name
+        self.group_id = group_id
+        self.should_run = True
+        self.real_time_mode = True
+        
+        # Initialize Kafka consumer
+        self.consumer = KafkaConsumer(
+            topic_name,
+            bootstrap_servers=[bootstrap_servers],
+            group_id=self.group_id,
+            value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+            auto_offset_reset='latest',
+            enable_auto_commit=True
+        )
+        
         self.load_configuration()
         self.setup_analytics()
+        self.setup_csv_output()
         self.running = False
         
+        logger.info(f"✅ Real-time consumer initialized ONLY")
+        logger.info(f"📊 Kafka: {bootstrap_servers} | Topic: {topic_name}")
+
     def setup_directories(self):
         """Create necessary directories"""
         dirs = ['logs', 'data/processed', 'data/analytics', 'data/dashboard']
@@ -251,34 +659,6 @@ class MalaysianTourismConsumer:
         """Initialize sentiment analyzer"""
         self.sentiment_analyzer = MalaysianTourismSentimentAnalyzer()
         logger.info("✅ Sentiment analyzer initialized")
-    
-    def setup_consumer(self):
-        """Setup Kafka consumer or file processing mode"""
-        if not KAFKA_AVAILABLE:
-            logger.info("⚠️ Kafka not available - using file processing mode")
-            self.consumer = None
-            self.file_mode = True
-            return
-        
-        try:
-            self.consumer = KafkaConsumer(
-                os.getenv('KAFKA_TOPIC', 'reddit-malaysia-tourism'),
-                bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092'),
-                group_id=os.getenv('KAFKA_CONSUMER_GROUP', 'malaysia-sentiment-group'),
-                auto_offset_reset=os.getenv('KAFKA_AUTO_OFFSET_RESET', 'earliest'),
-                enable_auto_commit=True,
-                auto_commit_interval_ms=1000,
-                value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-                consumer_timeout_ms=10000  # 10 second timeout
-            )
-            self.file_mode = False
-            logger.info(f"✅ Kafka consumer connected to topic: {os.getenv('KAFKA_TOPIC')}")
-            
-        except Exception as e:
-            logger.error(f"❌ Kafka consumer setup failed: {e}")
-            logger.info("📝 Falling back to file processing mode")
-            self.consumer = None
-            self.file_mode = True
     
     def load_configuration(self):
         """Load configuration from environment variables"""
@@ -316,32 +696,223 @@ class MalaysianTourismConsumer:
         
         logger.info("✅ Analytics tracking initialized")
     
-    def process_message(self, message: Dict) -> Optional[Dict]:
-        """Process individual message with sentiment analysis"""
+    def setup_csv_output(self):
+        """Setup CSV output for sentiment results"""
+        # Create CSV filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.csv_filename = f'data/processed/sentiment_results_{timestamp}.csv'
+        
+        # Create CSV file with headers
         try:
-            # Extract text content
-            content = message.get('content', '')
+            with open(self.csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                # Write header row with both original and cleaned text
+                writer.writerow([
+                    'original_text',
+                    'cleaned_text',  # New: Add cleaned text column
+                    'final_label', 
+                    'confidence_score',
+                    'method_used',
+                    'timestamp'
+                ])
+            
+            logger.info(f"✅ CSV output initialized: {self.csv_filename}")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize CSV output: {e}")
+            self.csv_filename = None
+    
+    def save_to_csv(self, processed_message: Dict):
+        """Save sentiment analysis results to CSV using unified pipeline data"""
+        if not self.csv_filename:
+            return
+        
+        try:
+            # Step 1: Get original content (for human readability)
+            title = processed_message.get('title', '')
+            original_content = processed_message.get('original_content', '')
+            original_text = f"{title} {original_content}".strip()
+            
+            # Step 2: Get fully processed text (comment-cleaned + NLTK-processed)
+            sentiment_analysis = processed_message.get('sentiment_analysis', {})
+            preprocessing = sentiment_analysis.get('preprocessing', {})
+            
+            # Extract the combined processed text (what the ML model actually saw)
+            if preprocessing:
+                cleaned_text = preprocessing.get('combined_processed', '')
+            else:
+                # Fallback: use the comment-cleaned content
+                cleaned_content = processed_message.get('content', '')
+                cleaned_text = self.basic_clean_text(cleaned_content)
+            
+            # Step 3: Get sentiment analysis results
+            final_sentiment = sentiment_analysis.get('final_sentiment', {})
+            final_label = final_sentiment.get('label', 'unknown')
+            confidence_score = final_sentiment.get('confidence', 0.0)
+            method_used = final_sentiment.get('method', 'unknown')
+            timestamp = processed_message.get('processing_timestamp', datetime.now(timezone.utc).isoformat())
+            
+            # Step 4: Clean text for CSV format (remove newlines, excessive whitespace)
+            original_text_cleaned = ' '.join(original_text.split())
+            cleaned_text_for_csv = ' '.join(cleaned_text.split()) if cleaned_text else ''
+            
+            # Step 5: Truncate very long text to prevent CSV issues
+            if len(original_text_cleaned) > 800:
+                original_text_cleaned = original_text_cleaned[:797] + '...'
+            
+            if len(cleaned_text_for_csv) > 500:
+                cleaned_text_for_csv = cleaned_text_for_csv[:497] + '...'
+            
+            # Step 6: Write to CSV with unified pipeline results
+            with open(self.csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([
+                    original_text_cleaned,      # Column 1: Original Reddit content (with "Comment on:")
+                    cleaned_text_for_csv,       # Column 2: Fully processed text (comment-cleaned + NLTK)
+                    final_label,                # Column 3: positive/negative/neutral
+                    round(confidence_score, 4), # Column 4: ML model confidence
+                    method_used,                # Column 5: Always 'trained_model'
+                    timestamp                   # Column 6: Processing timestamp
+                ])
+            
+            print(f"📄 CSV SAVED - Original: {original_text_cleaned[:50]}... → Processed: {cleaned_text_for_csv[:50]}... → {final_label}")
+            
+        except Exception as e:
+            logger.error(f"Failed to save to CSV: {e}")
+    
+    def basic_clean_text(self, text: str) -> str:
+        """Basic text cleaning for fallback use"""
+        if not text:
+            return ""
+        
+        # Remove URLs
+        text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
+        
+        # Remove Reddit-specific patterns
+        text = re.sub(r'/u/\w+', '', text)
+        text = re.sub(r'/r/\w+', '', text)
+        text = re.sub(r'\[deleted\]|\[removed\]', '', text)
+        
+        # Remove extra whitespace and convert to lowercase
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip().lower()
+        
+        return text
+    
+    def clean_comment_content(self, content: str) -> str:
+        if not content:
+            return content
+        
+        print(f"🔍 FULL CONTENT TO CLEAN: {content}")  # Show FULL content for debugging
+        
+        # Handle the specific pattern: "Comment on: [post content] ... [actual comment]"
+        if content.startswith("Comment on:"):
+            print("✅ Found 'Comment on:' pattern")
+            
+            # Look for the " ... " separator
+            if " ... " in content:
+                print("✅ Found ' ... ' separator")
+                # Split by " ... " and take everything after it (the actual comment)
+                parts = content.split(" ... ", 1)
+                if len(parts) > 1:
+                    actual_comment = parts[1].strip()
+                    if actual_comment:  # Make sure we have actual content
+                        print(f"🔍 EXTRACTED COMMENT: {actual_comment}")
+                        return actual_comment
+            else:
+                print("❌ No ' ... ' separator found")
+                print(f"🔍 Looking for other separators...")
+            
+            # Fallback: if no " ... " found, try other separators
+            fallback_separators = [" - ", " | ", "\n"]
+            for separator in fallback_separators:
+                if separator in content:
+                    print(f"✅ Found fallback separator: '{separator}'")
+                    parts = content.split(separator, 1)
+                    if len(parts) > 1:
+                        potential_comment = parts[1].strip()
+                        if potential_comment and len(potential_comment) > 10:
+                            print(f"🔍 EXTRACTED WITH FALLBACK: {potential_comment}")
+                            return potential_comment
+        else:
+            print("❌ Does not start with 'Comment on:'")
+        
+        print("❌ No cleaning applied, returning original")
+        return content
+
+    def process_message(self, message: Dict) -> Optional[Dict]:
+        """Process individual message with unified sentiment analysis pipeline"""
+        try:
+            # Step 1: Extract original content
+            original_content = message.get('content', '')
             title = message.get('title', '')
             
-            if not content:
+            print(f"🔍 PROCESSING MESSAGE: content_type = {message.get('content_type')}")
+            
+            # Step 2: Comment cleaning (removes "Comment on:" metadata)
+            cleaned_content = original_content
+            is_comment = False
+            
+            if message.get('content_type') == 'comment' or 'Comment on:' in original_content:
+                print("🧹 CLEANING COMMENT CONTENT")
+                cleaned_content = self.clean_comment_content(original_content)
+                is_comment = True
+                
+                # Log the cleaning for debugging
+                if original_content != cleaned_content:
+                    print(f"✅ COMMENT CLEANING SUCCESSFUL!")
+                    print(f"📝 Original: {original_content[:100]}...")
+                    print(f"📝 Cleaned:  {cleaned_content[:100]}...")
+                    logger.debug(f"Comment cleaned: '{original_content[:100]}...' -> '{cleaned_content[:100]}...'")
+                else:
+                    print(f"❌ NO COMMENT CLEANING APPLIED!")
+            else:
+                print("ℹ️ Not a comment, no cleaning needed")
+        
+            if not cleaned_content:
                 return None
             
-            # Perform sentiment analysis
-            sentiment_results = self.sentiment_analyzer.analyze_sentiment(content, title)
-            
-            # Enrich message with sentiment data
+            # Step 3: Store both versions in enriched message
             enriched_message = message.copy()
+            enriched_message['original_content'] = original_content  # For CSV column 1 (human-readable)
+            enriched_message['content'] = cleaned_content           # For processing pipeline
+            
+            # Step 4: Sentiment analysis pipeline 
+            # For comments: Don't pass title to avoid mixing post metadata with comment
+            if is_comment:
+                print(f"🤖 Running ML sentiment analysis on COMMENT ONLY (no title)...")
+                sentiment_results = self.sentiment_analyzer.analyze_sentiment(cleaned_content, "")  # Empty title
+            else:
+                print(f"🤖 Running ML sentiment analysis on POST (with title)...")
+                sentiment_results = self.sentiment_analyzer.analyze_sentiment(cleaned_content, title)
+            
+            # Step 5: Store results
             enriched_message['sentiment_analysis'] = sentiment_results
             enriched_message['processing_timestamp'] = datetime.now(timezone.utc).isoformat()
+            enriched_message['is_comment'] = is_comment  # Track if it's a comment
             
-            # Add to analytics
+            # Step 6: Update analytics and save to CSV
             self.update_analytics(enriched_message)
+            self.save_to_csv(enriched_message)
+            
+            # Step 7: Real-time logging (from realtime consumer)
+            if self.real_time_mode:
+                final_sentiment = sentiment_results.get('final_sentiment', {})
+                label = final_sentiment.get('label', 'unknown')
+                confidence = final_sentiment.get('confidence', 0.0)
+                method = final_sentiment.get('method', 'unknown')
+                
+                # Log the real-time result
+                logger.info(f"[SENTIMENT] {original_content[:100]}{'...' if len(original_content) > 100 else ''} → {label.upper()} ({confidence:.2f}) [{method}]")
             
             return enriched_message
-            
+    
         except Exception as e:
             logger.error(f"Error processing message {message.get('id', 'unknown')}: {e}")
             self.stats['processing_errors'] += 1
+            if "Trained model not available" in str(e):
+                logger.error("❌ CRITICAL: Trained model required. Run: python train_naive_bayes_model.py")
+                raise Exception(f"Consumer stopped - trained model required: {e}")
             return None
     
     def update_analytics(self, processed_message: Dict):
@@ -484,51 +1055,39 @@ class MalaysianTourismConsumer:
         logger.info(f"  Sentiment distribution: {dict(self.stats['sentiment_distribution'])}")
         logger.info(f"  Processing errors: {self.stats['processing_errors']}")
     
-    def process_from_files(self):
-        """Process messages from JSON files when Kafka is not available"""
-        logger.info("📁 Processing from saved files...")
+    def consume_from_kafka(self):
+        """Consume messages from Kafka for real-time processing"""
+        logger.info("🔍 Starting real-time sentiment analysis...")
+        logger.info("📊 Waiting for messages...")
         
-        # Find JSON files in data/raw directory
-        raw_data_dir = Path('data/raw')
-        if not raw_data_dir.exists():
-            logger.error("❌ No data/raw directory found")
-            return
-        
-        json_files = list(raw_data_dir.glob('*.jsonl'))
-        if not json_files:
-            logger.error("❌ No JSONL files found in data/raw directory")
-            return
-        
-        logger.info(f"📂 Found {len(json_files)} files to process")
-        
-        processed_count = 0
-        for file_path in json_files:
-            logger.info(f"📄 Processing file: {file_path.name}")
+        try:
+            message_count = 0
             
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    for line_num, line in enumerate(f, 1):
-                        try:
-                            message = json.loads(line.strip())
-                            processed_message = self.process_message(message)
-                            
-                            if processed_message:
-                                self.save_processed_message(processed_message)
-                                processed_count += 1
-                                
-                                # Progress reporting
-                                if processed_count % 50 == 0:
-                                    self.log_progress()
-                                    
-                        except json.JSONDecodeError as e:
-                            logger.warning(f"Invalid JSON in {file_path.name} line {line_num}: {e}")
-                        except Exception as e:
-                            logger.error(f"Error processing line {line_num} in {file_path.name}: {e}")
-                            
-            except Exception as e:
-                logger.error(f"Error reading file {file_path}: {e}")
-        
-        logger.info(f"✅ File processing completed! Processed {processed_count} messages")
+            for message in self.consumer:
+                if not self.should_run:
+                    break
+                
+                message_count += 1
+                
+                # Process the message
+                reddit_data = message.value
+                result = self.process_message(reddit_data)
+                
+                if result:
+                    # Save processed message
+                    self.save_processed_message(result)
+                
+                # Log progress every 10 messages
+                if message_count % 10 == 0:
+                    logger.info(f"📊 Processed {message_count} messages")
+                
+        except KeyboardInterrupt:
+            logger.info("🛑 Consumer stopped by user")
+        except Exception as e:
+            logger.error(f"❌ Consumer error: {e}")
+        finally:
+            self.consumer.close()
+            logger.info("✅ Consumer closed")
     
     def run_kafka_consumer(self):
         """Run Kafka consumer loop"""
@@ -580,6 +1139,10 @@ class MalaysianTourismConsumer:
             self.save_processed_message(message)
         logger.info(f"💾 Saved batch of {len(batch)} processed messages")
     
+    def stop_consuming(self):
+        """Stop consuming messages"""
+        self.should_run = False
+    
     def run(self):
         """Main consumer execution"""
         logger.info("🚀 Starting Malaysian Tourism Sentiment Consumer")
@@ -588,9 +1151,9 @@ class MalaysianTourismConsumer:
         self.running = True
         
         try:
-            if self.file_mode:
-                # Process from files
-                self.process_from_files()
+            if self.real_time_mode:
+                # Real-time Kafka consumption
+                self.consume_from_kafka()
             else:
                 # Start analytics reporting thread
                 analytics_thread = threading.Thread(
@@ -612,6 +1175,7 @@ class MalaysianTourismConsumer:
             logger.info(f"📈 Sentiment distribution: {dict(self.stats['sentiment_distribution'])}")
             logger.info(f"📁 Results saved to: {self.processed_file}")
             logger.info(f"📊 Analytics report: {self.analytics_file}")
+            logger.info(f"📄 CSV results: {self.csv_filename}")
             
         except Exception as e:
             logger.error(f"❌ Consumer execution failed: {e}")
@@ -628,9 +1192,16 @@ class MalaysianTourismConsumer:
                 self.save_analytics_report()
 
 def main():
-    """Main execution function"""
+    """Main execution - REAL-TIME ONLY"""
     try:
-        consumer = MalaysianTourismConsumer()
+        # Create consumer in real-time mode
+        consumer = MalaysianTourismConsumer(
+            bootstrap_servers='127.0.0.1:9092',
+            topic_name='malaysian-tourism-sentiment',
+            group_id='sentiment-group'
+        )
+        
+        # Run real-time processing
         consumer.run()
         
     except Exception as e:
