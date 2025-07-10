@@ -1,0 +1,39 @@
+2025-07-10 22:07:09,968 - INFO - SETUP: Pipeline directories created/verified
+2025-07-10 22:07:09,968 - INFO - 📋 Collection Configuration loaded:
+2025-07-10 22:07:09,968 - INFO -   Subreddits: ['malaysia', 'malaysiatravel', 'travel', 'solotravel', 'backpacking', 'TravelNoPics', 'digitalnomad', 'AsiaTravel', 'KualaLumpur', 'MalaysianFood']
+2025-07-10 22:07:09,968 - INFO -   Keywords: 22 Malaysian tourism terms
+2025-07-10 22:07:09,968 - INFO -   Max posts: 800, Max comments per post: 15
+2025-07-10 22:07:09,974 - INFO -   Strategies: ['hot', 'new', 'top', 'search']
+2025-07-10 22:07:09,974 - INFO - STARTING: Malaysian Tourism Sentiment Analysis Integrated Pipeline
+2025-07-10 22:07:09,974 - INFO - ================================================================================
+2025-07-10 22:07:09,976 - INFO - Pipeline Configuration:
+2025-07-10 22:07:09,976 - INFO -   Skip Data Collection: False
+2025-07-10 22:07:09,976 - INFO -   Skip Naive Bayes: False
+2025-07-10 22:07:09,976 - INFO -   Skip LSTM: False
+2025-07-10 22:07:09,976 - INFO -   Data File: data/raw/malaysia_tourism_data.csv
+2025-07-10 22:07:09,976 - INFO -   Minimum Samples: 100
+2025-07-10 22:07:09,976 - INFO -   Collection Strategy: Integrated with VADER sentiment analysis
+2025-07-10 22:07:09,976 - INFO - ================================================================================
+2025-07-10 22:07:09,976 - INFO - ============================================================
+2025-07-10 22:07:09,976 - INFO - STAGE START: Data Collection (Integrated)
+2025-07-10 22:07:09,976 - INFO - ============================================================
+2025-07-10 22:07:09,984 - INFO - SKIP: Recent data file exists (age: 0:04:29.774891)
+2025-07-10 22:07:09,986 - INFO - Use --force-collection to override
+2025-07-10 22:07:10,068 - INFO - STAGE END: Data Collection (Integrated) - SUCCESS
+2025-07-10 22:07:10,068 - INFO - Duration: 0:00:00.083857
+2025-07-10 22:07:10,068 - INFO - Details: Using existing data: 237 samples
+2025-07-10 22:07:10,068 - INFO - ============================================================
+2025-07-10 22:07:10,068 - INFO - ============================================================
+2025-07-10 22:07:10,068 - INFO - STAGE START: Naive Bayes Training
+2025-07-10 22:07:10,068 - INFO - ============================================================
+2025-07-10 22:07:10,074 - INFO - EXECUTING: Running train_naive_bayes_model.py...
+2025-07-10 22:07:20,639 - INFO - SUCCESS: Naive Bayes training completed
+2025-07-10 22:07:20,642 - INFO - STAGE END: Naive Bayes Training - SUCCESS
+2025-07-10 22:07:20,642 - INFO - Duration: 0:00:10.567749
+2025-07-10 22:07:20,645 - INFO - Details: Model saved: label_encoder_20250710_220719.pkl
+2025-07-10 22:07:20,645 - INFO - ============================================================
+2025-07-10 22:07:20,646 - INFO - ============================================================
+2025-07-10 22:07:20,646 - INFO - STAGE START: LSTM Training
+2025-07-10 22:07:20,646 - INFO - ============================================================
+2025-07-10 22:07:20,648 - INFO - EXECUTING: Running train_lstm_sentiment_model.py...
+2025-07-10 22:07:24,968 - INFO - INTERRUPTED: Integrated Pipeline stopped by user
