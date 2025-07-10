@@ -565,7 +565,7 @@ class MalaysianTourismNBTrainer:
         return tuned_results
     
     def save_models(self, results: Dict, best_model_name: str, tuned_results: Dict):
-        """Save trained models and metadata in LSTM-compatible format"""
+        """Save trained models and generate comprehensive reports for all configurations"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
         # Create models/naive_bayes directory
@@ -581,17 +581,20 @@ class MalaysianTourismNBTrainer:
         with open(tuned_model_path, 'wb') as f:
             pickle.dump(tuned_results['pipeline'], f)
         
-        # Save label encoder (matching LSTM format)
+        # Save label encoder
         label_encoder_path = f'models/naive_bayes/label_encoder_{timestamp}.pkl'
         with open(label_encoder_path, 'wb') as f:
             pickle.dump(self.label_encoder, f)
         
-        # Save vectorizer (Naive Bayes specific)
+        # Save vectorizer
         vectorizer_path = f'models/naive_bayes/vectorizer_{timestamp}.pkl'
         with open(vectorizer_path, 'wb') as f:
             pickle.dump(tuned_results['pipeline'].named_steps['vectorizer'], f)
+           
+        # ✅ NEW: Generate comparison report between configurations
+        self.generate_configuration_comparison_report(results, timestamp)
         
-        # ✅ SIMPLIFIED: Create LSTM-compatible report format (best model only)
+        # Create main report (for backward compatibility)
         report_data = {
             "timestamp": timestamp,
             "model_path": tuned_model_path,
@@ -612,26 +615,25 @@ class MalaysianTourismNBTrainer:
             "best_model_name": best_model_name,
             "hyperparameters": tuned_results['best_params'],
             "cv_score": float(tuned_results['best_cv_score']),
-            
-            # ✅ DIRECT: Top-level metrics (same as LSTM format)
             "f1_score": float(tuned_results['f1_score']),
             "precision": float(tuned_results['precision']),
             "recall": float(tuned_results['recall'])
         }
         
-        # Save report in LSTM-compatible format
+        # Save main report
         report_path = f'reports/naive_bayes_training_report_{timestamp}.json'
         with open(report_path, 'w', encoding='utf-8') as f:
             json.dump(report_data, f, indent=2, ensure_ascii=False)
         
-        logger.info(f"Models saved:")
+        logger.info(f"Models and reports saved:")
         logger.info(f"  Best model: {best_model_path}")
         logger.info(f"  Tuned model: {tuned_model_path}")
         logger.info(f"  Label encoder: {label_encoder_path}")
         logger.info(f"  Vectorizer: {vectorizer_path}")
-        logger.info(f"  Report: {report_path}")
+        logger.info(f"  Main report: {report_path}")
+        logger.info(f"  Detailed reports: reports/naive_bayes_*_{timestamp}.json")
 
-        # Return simplified metadata for backwards compatibility
+        # Return metadata
         metadata = {
             'timestamp': timestamp,
             'file_paths': {
@@ -646,6 +648,96 @@ class MalaysianTourismNBTrainer:
         }
         
         return metadata
+
+    def generate_configuration_comparison_report(self, results: Dict, timestamp: str):
+        """Generate comparison report between different configurations"""
+        logger.info("📋 Generating configuration comparison report...")
+        
+        # Extract metrics for comparison
+        comparison_data = {
+            "timestamp": timestamp,
+            "comparison_type": "naive_bayes_configurations",
+            "configurations": {},
+            "best_configuration": {},
+            "summary": {}
+        }
+        
+        # Process each configuration
+        best_f1 = 0
+        best_config = None
+        
+        for config_name, config_results in results.items():
+            config_summary = {
+                "test_accuracy": float(config_results['accuracy']),
+                "precision": float(config_results['precision']),
+                "recall": float(config_results['recall']),
+                "f1_score": float(config_results['f1_score']),
+                "cv_mean": float(config_results['cv_mean']),
+                "cv_std": float(config_results['cv_std']),
+                "vectorizer_type": "tfidf" if "tfidf" in config_name else "count",
+                "classifier_type": "multinomial" if "multinomial" in config_name else "complement"
+            }
+            
+            comparison_data["configurations"][config_name] = config_summary
+            
+            # Track best configuration
+            if config_results['f1_score'] > best_f1:
+                best_f1 = config_results['f1_score']
+                best_config = config_name
+        
+        # Best configuration details
+        comparison_data["best_configuration"] = {
+            "name": best_config,
+            "f1_score": best_f1,
+            "details": comparison_data["configurations"][best_config]
+        }
+        
+        # Generate summary statistics
+        all_accuracies = [config["test_accuracy"] for config in comparison_data["configurations"].values()]
+        all_f1_scores = [config["f1_score"] for config in comparison_data["configurations"].values()]
+        all_precisions = [config["precision"] for config in comparison_data["configurations"].values()]
+        all_recalls = [config["recall"] for config in comparison_data["configurations"].values()]
+        
+        comparison_data["summary"] = {
+            "total_configurations": len(results),
+            "metrics_summary": {
+                "accuracy": {
+                    "min": min(all_accuracies),
+                    "max": max(all_accuracies),
+                    "mean": sum(all_accuracies) / len(all_accuracies),
+                    "std": np.std(all_accuracies)
+                },
+                "f1_score": {
+                    "min": min(all_f1_scores),
+                    "max": max(all_f1_scores),
+                    "mean": sum(all_f1_scores) / len(all_f1_scores),
+                    "std": np.std(all_f1_scores)
+                },
+                "precision": {
+                    "min": min(all_precisions),
+                    "max": max(all_precisions),
+                    "mean": sum(all_precisions) / len(all_precisions),
+                    "std": np.std(all_precisions)
+                },
+                "recall": {
+                    "min": min(all_recalls),
+                    "max": max(all_recalls),
+                    "mean": sum(all_recalls) / len(all_recalls),
+                    "std": np.std(all_recalls)
+                }
+            },
+            "configuration_ranking": sorted(
+                [(name, config["f1_score"]) for name, config in comparison_data["configurations"].items()],
+                key=lambda x: x[1], reverse=True
+            )
+        }
+        
+        # Save comparison report
+        comparison_report_path = f'reports/naive_bayes_comparison_report_{timestamp}.json'
+        with open(comparison_report_path, 'w', encoding='utf-8') as f:
+            json.dump(comparison_data, f, indent=2, ensure_ascii=False)
+        
+        logger.info(f"✅ Saved comparison report: {comparison_report_path}")
     
     def train(self) -> Dict:
         """Main training pipeline with Option A implementation"""
