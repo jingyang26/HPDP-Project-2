@@ -38,6 +38,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple, Set
 from dotenv import load_dotenv
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import reddit_tourism_consumer2 as consumer2
 
 # Load environment variables
 load_dotenv('.env.local')
@@ -45,8 +46,18 @@ load_dotenv('.env.local')
 # Ensure proper encoding for Windows
 if sys.platform.startswith('win'):
     import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    # Only redirect if not already redirected
+    if hasattr(sys.stdout, 'buffer'):
+        try:
+            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+        except (AttributeError, ValueError):
+            pass  # Keep original stdout if redirection fails
+    
+    if hasattr(sys.stderr, 'buffer'):
+        try:
+            sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
+        except (AttributeError, ValueError):
+            pass  # Keep original stderr if redirection fails
 
 # Setup logging with UTF-8 support
 logging.basicConfig(
@@ -62,11 +73,12 @@ logger = logging.getLogger(__name__)
 class MalaysianTourismIntegratedPipeline:
     """Complete integrated pipeline for Malaysian tourism sentiment analysis"""
     
-    def __init__(self, skip_collection: bool = False, skip_naive_bayes: bool = False, skip_lstm: bool = False):
+    def __init__(self, skip_collection: bool = False, skip_naive_bayes: bool = False, skip_lstm: bool = False, skip_predictions: bool = False):
         """Initialize the integrated pipeline"""
         self.skip_collection = skip_collection
         self.skip_naive_bayes = skip_naive_bayes
         self.skip_lstm = skip_lstm
+        self.skip_predictions = skip_predictions  # ✅ NEW
         
         self.pipeline_start_time = datetime.now()
         self.stage_times = {}
@@ -74,6 +86,7 @@ class MalaysianTourismIntegratedPipeline:
         
         # File paths
         self.data_file = 'data/raw/malaysia_tourism_data.csv'
+        self.predicted_data_file = 'data/processed/predicted_malaysia_tourism_data.csv'  # ✅ NEW
         self.nb_model_dir = 'models/naive_bayes'
         self.lstm_model_dir = 'models/lstm'
         
@@ -957,6 +970,7 @@ class MalaysianTourismIntegratedPipeline:
         logger.info(f"  Skip Data Collection: {self.skip_collection}")
         logger.info(f"  Skip Naive Bayes: {self.skip_naive_bayes}")
         logger.info(f"  Skip LSTM: {self.skip_lstm}")
+        logger.info(f"  Skip Predictions: {self.skip_predictions}")
         logger.info(f"  Data File: {self.data_file}")
         logger.info(f"  Minimum Samples: {self.min_data_samples}")
         logger.info(f"  Collection Strategy: Integrated with VADER sentiment analysis")
@@ -985,7 +999,7 @@ class MalaysianTourismIntegratedPipeline:
                 else:
                     logger.error("MISSING: No data file found and collection skipped")
                     success = False
-            
+        
             # Stage 2: Naive Bayes Training
             if success and not self.skip_naive_bayes:
                 if not self.run_naive_bayes_training():
@@ -993,7 +1007,7 @@ class MalaysianTourismIntegratedPipeline:
                     success = False
             else:
                 logger.info("SKIPPED: Naive Bayes training stage")
-            
+
             # Stage 3: LSTM Training
             if success and not self.skip_lstm:
                 if not self.run_lstm_training():
@@ -1001,10 +1015,24 @@ class MalaysianTourismIntegratedPipeline:
                     success = False
             else:
                 logger.info("SKIPPED: LSTM training stage")
-            
-            # Generate final report
+
+            # Stage 4: Dual Model Predictions
+            if success and not self.skip_predictions:
+                if not self.run_dual_model_predictions():
+                    logger.error("FAILED: Dual model predictions stage failed")
+                    success = False
+            else:
+                logger.info("SKIPPED: Dual model predictions stage")
+
+            # ✅ SWITCHED: Stage 5: Generate final comparison report (MOVED BEFORE dashboard)
             self.generate_model_comparison()
-            
+
+            # ✅ SWITCHED: Stage 6: Elasticsearch Dashboard (MOVED_AFTER comparison)
+            if success:
+                if not self.run_elasticsearch_dashboard_stage():
+                    logger.warning("WARNING: Elasticsearch dashboard stage failed (non-critical)")
+                    # Don't fail the entire pipeline for dashboard issues
+        
             # Final status
             total_duration = datetime.now() - self.pipeline_start_time
             
@@ -1014,13 +1042,16 @@ class MalaysianTourismIntegratedPipeline:
                 logger.info("All stages completed. Models are ready for deployment.")
                 logger.info(f"🇲🇾 Malaysia-related items collected: {self.collection_stats['malaysia_related']}")
                 logger.info(f"📊 Total items processed: {self.collection_stats['posts_collected'] + self.collection_stats['comments_collected']}")
+                if not self.skip_predictions:
+                    logger.info(f"🔮 Predictions saved to: {self.predicted_data_file}")
+                    logger.info(f"📊 Dashboard URL: http://localhost:5601")
             else:
                 logger.error("FAILED: Integrated pipeline completed with errors!")
                 logger.error(f"Total execution time: {total_duration}")
                 logger.error("Check logs and reports for details.")
-            
+
             return success
-            
+
         except KeyboardInterrupt:
             logger.info("INTERRUPTED: Integrated Pipeline stopped by user")
             return False
@@ -1030,34 +1061,788 @@ class MalaysianTourismIntegratedPipeline:
             logger.error(f"Full error: {traceback.format_exc()}")
             return False
 
+    def run_dual_model_predictions(self) -> bool:
+        """Run predictions using both Naive Bayes and LSTM models separately"""
+        self.log_stage_start("Dual Model Predictions")
+        
+        try:
+            # ✅ NEW: Check if predicted data already exists
+            if os.path.exists(self.predicted_data_file):
+                file_age = datetime.now() - datetime.fromtimestamp(os.path.getmtime(self.predicted_data_file))
+                
+                # Check if file is recent (less than 6 hours old)
+                if file_age < timedelta(hours=6):
+                    logger.info(f"SKIP: Recent predicted data file exists (age: {file_age})")
+                    logger.info(f"File: {self.predicted_data_file}")
+                    
+                    # Validate the existing file structure
+                    try:
+                        df = pd.read_csv(self.predicted_data_file)
+                        required_columns = ['id', 'content', 'sentiment_label', 'predicted_nb', 'nb_confidence', 'predicted_lstm', 'lstm_confidence']
+                        
+                        if all(col in df.columns for col in required_columns):
+                            logger.info(f"✅ Existing file has {len(df)} prediction records with correct structure")
+                            logger.info(f"📋 Columns: {list(df.columns)}")
+                            self.log_stage_end("Dual Model Predictions", True, f"Using existing predictions: {len(df)} records")
+                            return True
+                        else:
+                            missing_cols = [col for col in required_columns if col not in df.columns]
+                            logger.warning(f"❌ Existing file missing columns: {missing_cols}")
+                            logger.info("🔄 Regenerating predictions with correct structure...")
+                    except Exception as e:
+                        logger.warning(f"❌ Error reading existing file: {e}")
+                        logger.info("🔄 Regenerating predictions...")
+                else:
+                    logger.info(f"OUTDATED: Predicted data file is old (age: {file_age})")
+                    logger.info("🔄 Regenerating fresh predictions...")
+        
+            # Check if data file exists
+            if not os.path.exists(self.data_file):
+                self.log_stage_end("Dual Model Predictions", False, "Data file not found")
+                return False
+            
+            # ✅ Initialize consumer2's sentiment analyzer
+            logger.info("🔄 Loading dual model sentiment analyzer...")
+            try:
+                sentiment_analyzer = consumer2.MalaysianTourismSentimentAnalyzer()
+            except Exception as e:
+                logger.error(f"❌ Failed to initialize sentiment analyzer: {e}")
+                self.log_stage_end("Dual Model Predictions", False, "Sentiment analyzer initialization failed")
+                return False
+            
+            # ✅ IMPROVED: Check model availability more thoroughly
+            models_available = []
+            
+            # Check Naive Bayes model
+            try:
+                if (hasattr(sentiment_analyzer, 'trained_model') and 
+                    sentiment_analyzer.trained_model is not None and
+                    hasattr(sentiment_analyzer, 'vectorizer') and
+                    sentiment_analyzer.vectorizer is not None and
+                    hasattr(sentiment_analyzer, 'label_encoder') and
+                    sentiment_analyzer.label_encoder is not None):
+                    models_available.append("Naive Bayes")
+                    logger.info("✅ Naive Bayes model loaded successfully")
+                else:
+                    logger.warning("❌ Naive Bayes model not available (missing model/vectorizer/encoder)")
+            except Exception as e:
+                logger.warning(f"❌ Naive Bayes model check failed: {e}")
+            
+            # Check LSTM model
+            try:
+                if (hasattr(sentiment_analyzer, 'lstm_model') and 
+                    sentiment_analyzer.lstm_model is not None and
+                    hasattr(sentiment_analyzer, 'lstm_tokenizer') and
+                    sentiment_analyzer.lstm_tokenizer is not None and
+                    hasattr(sentiment_analyzer, 'lstm_label_encoder') and
+                    sentiment_analyzer.lstm_label_encoder is not None):
+                    models_available.append("LSTM")
+                    logger.info("✅ LSTM model loaded successfully")
+                else:
+                    logger.warning("❌ LSTM model not available (missing model/tokenizer/encoder)")
+            except Exception as e:
+                logger.warning(f"❌ LSTM model check failed: {e}")
+            
+            # ✅ STOP if no models are available
+            if not models_available:
+                logger.warning("🛑 NO MODELS AVAILABLE FOR PREDICTION")
+                logger.info("📋 To train models first, run:")
+                logger.info("   python batch.py --skip-collection --skip-predictions")
+                logger.info("📋 Model file locations to check:")
+                logger.info(f"   Naive Bayes: {self.nb_model_dir}/")
+                logger.info(f"   LSTM: {self.lstm_model_dir}/")
+                
+                self.log_stage_end("Dual Model Predictions", True, "Skipped - No models available")
+                return True  # ✅ Return True to not fail the pipeline, just skip
+        
+            logger.info(f"📊 Available models: {', '.join(models_available)}")
+            
+            # Load data
+            logger.info("📊 Loading data for dual model prediction...")
+            df = pd.read_csv(self.data_file)
+            logger.info(f"Data loaded: {len(df)} rows")
+            
+            # ✅ SIMPLIFIED: Create results list for CSV export
+            results_list = []
+            
+            # Track prediction statistics
+            prediction_stats = {
+                'total_predictions': len(df),
+                'nb_successful': 0,
+                'lstm_successful': 0,
+                'both_successful': 0,
+                'agreements': 0,
+                'disagreements': 0,
+                'start_time': datetime.now()
+            }
+            
+            logger.info("🚀 Starting dual model predictions...")
+            
+            # Process each row with both models
+            for idx, row in df.iterrows():
+                content = str(row.get('content', ''))
+                row_id = row.get('id', idx)  # Use 'id' column or index as fallback
+                sentiment_label = row.get('sentiment_label', 'unknown')
+                
+                # Skip empty content
+                if not content or content.strip() == '':
+                    continue
+                
+                # ✅ Initialize default values
+                predicted_nb = 'neutral'
+                nb_confidence = 0.0
+                predicted_lstm = 'neutral'
+                lstm_confidence = 0.0
+                
+                try:
+                    # ✅ Use the dual model analysis function from consumer2.py
+                    dual_results = sentiment_analyzer.analyze_sentiment_dual_models(content, "")
+                    
+                    # Extract Naive Bayes results
+                    nb_result = dual_results.get('naive_bayes_result', {})
+                    if 'error' not in nb_result:
+                        predicted_nb = nb_result.get('label', 'neutral')
+                        nb_confidence = nb_result.get('confidence', 0.0)
+                        prediction_stats['nb_successful'] += 1
+                    
+                    # Extract LSTM results
+                    lstm_result = dual_results.get('lstm_result', {})
+                    if 'error' not in lstm_result:
+                        predicted_lstm = lstm_result.get('label', 'neutral')
+                        lstm_confidence = lstm_result.get('confidence', 0.0)
+                        prediction_stats['lstm_successful'] += 1
+                    
+                    # Track agreement statistics
+                    if 'error' not in nb_result and 'error' not in lstm_result:
+                        prediction_stats['both_successful'] += 1
+                        model_agreement = dual_results.get('model_agreement', {})
+                        if model_agreement.get('labels_match', False):
+                            prediction_stats['agreements'] += 1
+                        else:
+                            prediction_stats['disagreements'] += 1
+            
+                except Exception as e:
+                    logger.error(f"Dual prediction error for row {idx}: {e}")
+                
+                # ✅ SIMPLIFIED: Add result to list with ONLY required columns
+                results_list.append({
+                    'id': row_id,
+                    'content': content,
+                    'sentiment_label': sentiment_label,
+                    'predicted_nb': predicted_nb,
+                    'nb_confidence': round(nb_confidence, 4),
+                    'predicted_lstm': predicted_lstm,
+                    'lstm_confidence': round(lstm_confidence, 4)
+                })
+                
+                # Progress reporting every 500 rows
+                if (idx + 1) % 500 == 0:
+                    elapsed = datetime.now() - prediction_stats['start_time']
+                    logger.info(f"Progress: {idx + 1}/{len(df)} dual predictions completed ({elapsed})")
+        
+            # ✅ SIMPLIFIED: Create CSV with ONLY required columns
+            results_df = pd.DataFrame(results_list)
+            
+            # Create output directory
+            Path('data/processed').mkdir(parents=True, exist_ok=True)
+            
+            # ✅ Save SIMPLIFIED CSV with exact columns requested
+            results_df.to_csv(self.predicted_data_file, index=False, encoding='utf-8')
+            
+            # Log final statistics
+            elapsed = datetime.now() - prediction_stats['start_time']
+            logger.info("🎯 DUAL MODEL PREDICTION RESULTS:")
+            logger.info(f"  Total rows processed: {prediction_stats['total_predictions']}")
+            logger.info(f"  Available models: {', '.join(models_available)}")
+            logger.info(f"  Naive Bayes successful: {prediction_stats['nb_successful']}")
+            logger.info(f"  LSTM successful: {prediction_stats['lstm_successful']}")
+            logger.info(f"  Both models successful: {prediction_stats['both_successful']}")
+            logger.info(f"  Model agreements: {prediction_stats['agreements']}")
+            logger.info(f"  Model disagreements: {prediction_stats['disagreements']}")
+            if prediction_stats['both_successful'] > 0:
+                agreement_rate = prediction_stats['agreements'] / prediction_stats['both_successful'] * 100
+                logger.info(f"  Agreement rate: {agreement_rate:.1f}%")
+            logger.info(f"  Processing time: {elapsed}")
+            logger.info(f"  Output file: {self.predicted_data_file}")
+            logger.info(f"📋 CSV columns: {list(results_df.columns)}")
+            
+            self.log_stage_end("Dual Model Predictions", True, f"Dual predictions saved to {self.predicted_data_file}")
+            return True
+        
+        except Exception as e:
+            error_msg = f"Dual model predictions error: {e}"
+            logger.error(f"Full error: {traceback.format_exc()}")
+            self.log_stage_end("Dual Model Predictions", False, error_msg)
+            return False
+
+    def run_elasticsearch_dashboard_stage(self) -> bool:
+        self.log_stage_start("Elasticsearch Dashboard")
+        
+        try:
+            # Check if predicted data file exists
+            if not os.path.exists(self.predicted_data_file):
+                logger.warning("🛑 NO PREDICTED DATA FOUND")
+                logger.info("📋 Run predictions first:")
+                logger.info("   python batch.py --skip-collection --skip-naive-bayes --skip-lstm")
+                self.log_stage_end("Elasticsearch Dashboard", True, "Skipped - No predicted data available")
+                return True
+            
+            # Import Elasticsearch directly
+            try:
+                from elasticsearch import Elasticsearch
+                from elasticsearch.helpers import bulk
+            except ImportError:
+                logger.error("❌ Elasticsearch library not available. Install with: pip install elasticsearch")
+                self.log_stage_end("Elasticsearch Dashboard", False, "Elasticsearch library missing")
+                return False
+            
+            # Check if Elasticsearch is running
+            if not self.check_service_running("localhost", 9200):
+                logger.error("❌ Elasticsearch not running on localhost:9200")
+                logger.info("💡 Make sure Elasticsearch is running:")
+                logger.info("   docker-compose up -d elasticsearch kibana")
+                self.log_stage_end("Elasticsearch Dashboard", False, "Elasticsearch not accessible")
+                return False
+            
+            logger.info("✅ Elasticsearch detected on localhost:9200")
+            
+            # Create Elasticsearch client
+            try:
+                es_client = Elasticsearch(
+                    hosts=["http://localhost:9200"],
+                    basic_auth=("elastic", "changeme"),
+                    verify_certs=False,
+                    ssl_show_warn=False,
+                    request_timeout=30,
+                    max_retries=3,
+                    retry_on_timeout=True
+                )
+                
+                # Test connection
+                if not es_client.ping():
+                    logger.error("❌ Cannot connect to Elasticsearch")
+                    self.log_stage_end("Elasticsearch Dashboard", False, "Elasticsearch connection failed")
+                    return False
+                
+                logger.info("✅ Elasticsearch connection established")
+                
+            except Exception as e:
+                logger.error(f"❌ Elasticsearch client creation failed: {e}")
+                self.log_stage_end("Elasticsearch Dashboard", False, f"Connection error: {e}")
+                return False
+            
+            # Index configuration
+            index_base = "malaysia-tourism-predictions"
+            date_suffix = datetime.now().strftime('%Y-%m')
+            index_name = f"{index_base}-{date_suffix}"
+            
+            logger.info(f"📊 Elasticsearch Configuration:")
+            logger.info(f"  Index: {index_name}")
+            logger.info(f"  Data file: {self.predicted_data_file}")
+            
+            # Create index template
+            self.create_prediction_index_template(es_client, index_base)
+            
+            # Load predicted data
+            logger.info("📊 Loading predicted data for dashboard...")
+            df = pd.read_csv(self.predicted_data_file)
+            logger.info(f"Loaded {len(df)} prediction records")
+            
+            # ✅ FIXED: Prepare ALL documents first, then upload in batches
+            all_documents = []
+            current_time = datetime.now(timezone.utc)
+            
+            logger.info("🔄 Preparing documents for upload...")
+            
+            for idx, row in df.iterrows():
+                # Create document
+                doc = {
+                    '_index': index_name,
+                    '_source': {
+                        'record_id': str(row.get('id', idx)),
+                        'content': str(row.get('content', ''))[:1000],  # Limit content length
+                        'original_sentiment': str(row.get('sentiment_label', 'unknown')),
+                        
+                        # Naive Bayes predictions
+                        'nb_prediction': str(row.get('predicted_nb', 'neutral')),
+                        'nb_confidence': float(row.get('nb_confidence', 0.0)),
+                        
+                        # LSTM predictions
+                        'lstm_prediction': str(row.get('predicted_lstm', 'neutral')),
+                        'lstm_confidence': float(row.get('lstm_confidence', 0.0)),
+                        
+                        # Accuracy fields (if original sentiment available)
+                        'nb_correct': str(row.get('sentiment_label', 'unknown')) == str(row.get('predicted_nb', 'neutral')) if row.get('sentiment_label', 'unknown') != 'unknown' else None,
+                        'lstm_correct': str(row.get('sentiment_label', 'unknown')) == str(row.get('predicted_lstm', 'neutral')) if row.get('sentiment_label', 'unknown') != 'unknown' else None,
+                        
+                        # Timestamp
+                        '@timestamp': current_time.isoformat()
+                    }
+                }
+                
+                all_documents.append(doc)
+            
+            logger.info(f"✅ Prepared {len(all_documents)} documents for upload")
+            
+            # ✅ FIXED: Upload in batches with proper error handling
+            batch_size = 1000
+            total_uploaded = 0
+            
+            for i in range(0, len(all_documents), batch_size):
+                batch = all_documents[i:i + batch_size]
+                
+                try:
+                    # Upload batch
+                    success, failed = bulk(
+                        es_client, 
+                        batch, 
+                        chunk_size=500, 
+                        request_timeout=60,
+                        max_retries=3,
+                        initial_backoff=2,
+                        max_backoff=600
+                    )
+                    
+                    total_uploaded += len(batch) - len(failed) if failed else len(batch)
+                    
+                    if failed:
+                        logger.warning(f"⚠️ Batch {i//batch_size + 1}: {len(failed)} documents failed")
+                    else:
+                        logger.info(f"📤 Batch {i//batch_size + 1}: {len(batch)} documents uploaded successfully")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Batch {i//batch_size + 1} upload failed: {e}")
+            
+            # ✅ FIXED: Force index refresh to make documents immediately searchable
+            try:
+                es_client.indices.refresh(index=index_name)
+                logger.info("✅ Index refreshed - documents are now searchable")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to refresh index: {e}")
+            
+            # ✅ FIXED: Verify upload by checking document count
+            try:
+                count_response = es_client.count(index=index_name)
+                actual_count = count_response['count']
+                logger.info(f"✅ Verification: {actual_count} documents found in index")
+                
+                if actual_count == 0:
+                    logger.error("❌ No documents found in index after upload!")
+                    # Try a simple test document
+                    test_doc = {
+                        '_index': index_name,
+                        '_source': {
+                            'record_id': 'test_001',
+                            'content': 'Test document for Malaysia tourism predictions',
+                            'original_sentiment': 'positive',
+                            'nb_prediction': 'positive',
+                            'nb_confidence': 0.8,
+                            'lstm_prediction': 'positive', 
+                            'lstm_confidence': 0.9,
+                            '@timestamp': datetime.now(timezone.utc).isoformat()
+                        }
+                    }
+                    
+                    try:
+                        es_client.index(index=index_name, body=test_doc['_source'])
+                        es_client.indices.refresh(index=index_name)
+                        logger.info("✅ Test document uploaded successfully")
+                    except Exception as test_e:
+                        logger.error(f"❌ Even test document failed: {test_e}")
+                        
+            except Exception as e:
+                logger.warning(f"⚠️ Could not verify document count: {e}")
+            
+            # Generate dashboard statistics
+            dashboard_stats = self.generate_dashboard_statistics(df)
+            
+            # ✅ NEW: Import Kibana dashboards and visualizations
+            logger.info("🎨 Setting up Kibana dashboards...")
+
+            # Import dashboard from NDJSON file
+            if os.path.exists("export_batch.ndjson"):
+                self.import_kibana_dashboard(es_client, "export_batch.ndjson")
+            else:
+                logger.warning("❌ export_batch.ndjson not found")
+                logger.info("💡 Place export_batch.ndjson in the project root for automatic dashboard import")
+
+            # Wait a moment for Kibana to process
+            import time
+            time.sleep(3)
+
+            # Log final statistics
+            logger.info("🎯 ELASTICSEARCH DASHBOARD RESULTS:")
+            logger.info(f"  Documents prepared: {len(all_documents)}")
+            logger.info(f"  Documents uploaded: {total_uploaded}")
+            logger.info(f"  Index name: {index_name}")
+            logger.info(f"  Elasticsearch host: localhost:9200")
+            logger.info(f"  Model agreement rate: {dashboard_stats['agreement_rate']:.1f}%")
+            logger.info(f"  NB accuracy: {dashboard_stats['nb_accuracy']:.1f}%")
+            logger.info(f"  LSTM accuracy: {dashboard_stats['lstm_accuracy']:.1f}%")
+            logger.info(f"  🐳 Kibana URL: http://localhost:5601")
+            logger.info(f"  📈 Index pattern: {index_base}-*")
+            logger.info("🎨 DASHBOARDS:")
+            logger.info("   → Go to Kibana → Dashboard")
+            logger.info("   → Look for 'Malaysia Tourism Sentiment Analysis' dashboard")
+            logger.info("   → Automatic visualizations ready!")
+
+            self.log_stage_end("Elasticsearch Dashboard", True, f"{total_uploaded} documents uploaded to {index_name} with dashboards")
+            return True
+
+        except Exception as e:
+            error_msg = f"Elasticsearch dashboard error: {e}"
+            logger.error(f"Full error: {traceback.format_exc()}")
+            self.log_stage_end("Elasticsearch Dashboard", False, error_msg)
+            return False
+            
+    def create_prediction_index_template(self, es_client, index_base: str) -> bool:
+        """Create Elasticsearch index template for prediction data with simplified mapping"""
+        try:
+            template_name = f"{index_base}-template"
+            
+            template_body = {
+                "index_patterns": [f"{index_base}-*"],
+                "settings": {
+                    "number_of_shards": 1,
+                    "number_of_replicas": 0,
+                    "index.refresh_interval": "5s"
+                },
+                "mappings": {
+                    "properties": {
+                        "@timestamp": {"type": "date"},
+                        "record_id": {"type": "keyword"},
+                        "content": {
+                            "type": "text",
+                            "analyzer": "standard",
+                            "fields": {
+                                "keyword": {"type": "keyword", "ignore_above": 256}
+                            }
+                        },
+                        "original_sentiment": {"type": "keyword"},
+                        "nb_prediction": {"type": "keyword"},
+                        "nb_confidence": {"type": "float"},
+                        "lstm_prediction": {"type": "keyword"},
+                        "lstm_confidence": {"type": "float"},
+                        "nb_correct": {"type": "boolean"},
+                        "lstm_correct": {"type": "boolean"}
+                    }
+                }
+            }
+            
+            # Create or update template
+            response = es_client.indices.put_template(
+                name=template_name,
+                body=template_body
+            )
+            
+            logger.info(f"✅ Index template created: {template_name}")
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Failed to create index template: {e}")
+            return False
+
+    def check_service_running(self, host: str, port: int) -> bool:
+        try:
+            import socket
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(5)
+                result = s.connect_ex((host, port))
+                return result == 0
+        except Exception as e:
+            logger.error(f"❌ Service check failed for {host}:{port} - {e}")
+            return False
+
+    def generate_dashboard_statistics(self, df: pd.DataFrame) -> Dict:
+        """Generate statistics for dashboard logging"""
+        try:
+            total_records = len(df)
+            
+            # Model agreement
+            agreements = (df['predicted_nb'] == df['predicted_lstm']).sum()
+            agreement_rate = (agreements / total_records * 100) if total_records > 0 else 0
+            
+            # Accuracy calculation (if ground truth available)
+            nb_accuracy = 0
+            lstm_accuracy = 0
+            
+            if 'sentiment_label' in df.columns:
+                valid_labels = df[df['sentiment_label'] != 'unknown']
+                if len(valid_labels) > 0:
+                    nb_correct = (valid_labels['sentiment_label'] == valid_labels['predicted_nb']).sum()
+                    lstm_correct = (valid_labels['sentiment_label'] == valid_labels['predicted_lstm']).sum()
+                    nb_accuracy = (nb_correct / len(valid_labels) * 100)
+                    lstm_accuracy = (lstm_correct / len(valid_labels) * 100)
+            
+            return {
+                'total_records': total_records,
+                'agreements': agreements,
+                'agreement_rate': agreement_rate,
+                'nb_accuracy': nb_accuracy,
+                'lstm_accuracy': lstm_accuracy
+            }
+            
+        except Exception as e:
+            logger.warning(f"Failed to generate dashboard statistics: {e}")
+            return {
+                'total_records': len(df),
+                'agreements': 0,
+                'agreement_rate': 0,
+                'nb_accuracy': 0,
+                'lstm_accuracy': 0
+            }
+        
+    def import_kibana_objects(self, ndjson_file: str = "export_batch.ndjson") -> bool:
+        logger.info("📊 Importing Kibana index patterns and dashboards...")
+        
+        try:
+            import requests
+            
+            # Check if export file exists
+            if not os.path.exists(ndjson_file):
+                logger.error(f"❌ {ndjson_file} not found in current directory")
+                logger.info("💡 Please ensure export_batch.ndjson is in the project root")
+                
+                # Try alternative names
+                alternative_files = ["export.ndjson", "kibana_export.ndjson", "dashboard_export.ndjson"]
+                for alt_file in alternative_files:
+                    if os.path.exists(alt_file):
+                        logger.info(f"✅ Found alternative file: {alt_file}")
+                        ndjson_file = alt_file
+                        break
+                else:
+                    return False
+            
+            # Wait for Kibana to be ready
+            kibana_url = "http://localhost:5601"
+            max_wait = 60  # 1 minute
+            wait_time = 0
+            
+            while wait_time < max_wait:
+                try:
+                    response = requests.get(f"{kibana_url}/api/status", timeout=5)
+                    if response.status_code == 200:
+                        logger.info("✅ Kibana is ready for import")
+                        break
+                except:
+                    pass
+                
+                logger.info("⏱️ Waiting for Kibana to be ready...")
+                time.sleep(5)
+                wait_time += 5
+            else:
+                logger.error("❌ Kibana not ready for import")
+                return False
+            
+            # Read the export file
+            with open(ndjson_file, 'r', encoding='utf-8') as f:
+                ndjson_content = f.read()
+            
+            logger.info(f"📁 File size: {len(ndjson_content)} bytes")
+            logger.info(f"📋 File content preview: {ndjson_content[:200]}...")
+            
+            # Import objects using Kibana API
+            import_url = f"{kibana_url}/api/saved_objects/_import"
+            
+            # Prepare the request
+            files = {
+                'file': (ndjson_file, ndjson_content, 'application/ndjson')
+            }
+            
+            headers = {
+                'kbn-xsrf': 'true'
+            }
+            
+            # Add overwrite parameter
+            params = {
+                'overwrite': 'true'  # Overwrite existing objects
+            }
+            
+            logger.info("📤 Uploading index patterns and dashboards to Kibana...")
+            
+            response = requests.post(
+                import_url,
+                files=files,
+                headers=headers,
+                params=params,
+                timeout=30
+            )
+            
+            if response.status_code in [200, 201]:
+                result = response.json()
+                success_count = result.get('successCount', 0)
+                errors = result.get('errors', [])
+                
+                logger.info(f"✅ Successfully imported {success_count} Kibana objects")
+                
+                if errors:
+                    logger.warning(f"⚠️ Import warnings: {len(errors)} objects had issues")
+                    for error in errors[:3]:  # Show first 3 errors
+                        error_msg = error.get('error', {}).get('message', 'Unknown error')
+                        error_type = error.get('meta', {}).get('type', 'unknown')
+                        logger.warning(f"  - {error_type}: {error_msg}")
+                
+                # Log what was imported
+                success_results = result.get('successResults', [])
+                if success_results:
+                    logger.info("🎯 Successfully imported objects:")
+                    for obj in success_results[:10]:  # Show first 10
+                        obj_type = obj.get('meta', {}).get('type', 'unknown')
+                        obj_title = obj.get('meta', {}).get('title', 'untitled')
+                        logger.info(f"  ✅ {obj_type}: {obj_title}")
+                
+                return True
+            else:
+                logger.error(f"❌ Failed to import objects: HTTP {response.status_code}")
+                logger.error(f"Response: {response.text}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Kibana import failed: {e}")
+            import traceback
+            logger.error(f"Full error: {traceback.format_exc()}")
+            return False
+
+    def start_dashboard_connection_only(self, es_client) -> bool:
+        try:
+            logger.info("📊 Setting up dashboard connection...")
+            
+            # Check if Elasticsearch is running
+            if not self.check_service_running("localhost", 9200):
+                logger.error("❌ Elasticsearch not running")
+                return False
+            
+            logger.info("✅ Elasticsearch detected")
+            
+            # Test ES client connection
+            if not es_client.ping():
+                logger.error("❌ Cannot connect to Elasticsearch")
+                return False
+            
+            logger.info("✅ Dashboard connection established")
+            
+            # Create index template (but NOT index patterns - they come from NDJSON)
+            self.create_prediction_index_template(es_client, "malaysia-tourism-predictions")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Dashboard initialization failed: {e}")
+            return False
 def main():
-    """Main execution function with argument parsing"""
+    """Main function to run the integrated pipeline with command line arguments"""
     import argparse
     
-    parser = argparse.ArgumentParser(description='Malaysian Tourism Sentiment Analysis Integrated Pipeline')
-    parser.add_argument('--skip-collection', action='store_true', help='Skip integrated data collection stage')
-    parser.add_argument('--skip-naive-bayes', action='store_true', help='Skip Naive Bayes training stage')
-    parser.add_argument('--skip-lstm', action='store_true', help='Skip LSTM training stage')
-    parser.add_argument('--force-collection', action='store_true', help='Force data collection even if recent data exists')
-    parser.add_argument('--force-training', action='store_true', help='Force model training even if recent models exist')
+    # Setup command line arguments
+    parser = argparse.ArgumentParser(
+        description='Malaysian Tourism Sentiment Analysis Integrated Pipeline',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python batch.py                                    # Run complete pipeline
+  python batch.py --skip-collection                  # Skip data collection
+  python batch.py --skip-naive-bayes                 # Skip Naive Bayes training
+  python batch.py --skip-lstm                        # Skip LSTM training
+  python batch.py --skip-predictions                 # Skip dual model predictions
+  python batch.py --skip-collection --skip-naive-bayes --skip-lstm    # Only run predictions + dashboard
+        """
+    )
     
+    parser.add_argument('--skip-collection', 
+                       action='store_true',
+                       help='Skip the data collection stage')
+    
+    parser.add_argument('--skip-naive-bayes',
+                       action='store_true', 
+                       help='Skip the Naive Bayes training stage')
+    
+    parser.add_argument('--skip-lstm',
+                       action='store_true',
+                       help='Skip the LSTM training stage')
+    
+    parser.add_argument('--skip-predictions',
+                       action='store_true',
+                       help='Skip the dual model predictions stage')
+    
+    parser.add_argument('--force-collection',
+                       action='store_true',
+                       help='Force data collection even if recent data exists')
+    
+    parser.add_argument('--force-training',
+                       action='store_true',
+                       help='Force model training even if recent models exist')
+    
+    parser.add_argument('--verbose', '-v',
+                       action='store_true',
+                       help='Enable verbose logging')
+    
+    # Parse arguments
     args = parser.parse_args()
     
+    # Setup logging level
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logger.info("🔍 Verbose logging enabled")
+    
+    # Display startup banner
+    logger.info("=" * 80)
+    logger.info("🇲🇾 MALAYSIAN TOURISM SENTIMENT ANALYSIS - INTEGRATED PIPELINE")
+    logger.info("=" * 80)
+    logger.info("🚀 Starting integrated pipeline with following configuration:")
+    logger.info(f"   Skip Data Collection: {args.skip_collection}")
+    logger.info(f"   Skip Naive Bayes Training: {args.skip_naive_bayes}")
+    logger.info(f"   Skip LSTM Training: {args.skip_lstm}")
+    logger.info(f"   Skip Dual Predictions: {args.skip_predictions}")
+    logger.info(f"   Force Collection: {args.force_collection}")
+    logger.info(f"   Force Training: {args.force_training}")
+    logger.info(f"   Verbose Mode: {args.verbose}")
+    logger.info("=" * 80)
+    
     try:
-        # Create and run integrated pipeline
+        # Initialize and run the integrated pipeline
         pipeline = MalaysianTourismIntegratedPipeline(
             skip_collection=args.skip_collection,
             skip_naive_bayes=args.skip_naive_bayes,
-            skip_lstm=args.skip_lstm
+            skip_lstm=args.skip_lstm,
+            skip_predictions=args.skip_predictions
         )
         
+        # Handle force options
+        if args.force_collection and os.path.exists(pipeline.data_file):
+            logger.info("🔄 Force collection enabled - removing existing data file")
+            os.remove(pipeline.data_file)
+        
+        if args.force_training:
+            logger.info("🔄 Force training enabled - removing existing model files")
+            import shutil
+            if os.path.exists(pipeline.nb_model_dir):
+                shutil.rmtree(pipeline.nb_model_dir)
+                Path(pipeline.nb_model_dir).mkdir(parents=True, exist_ok=True)
+            if os.path.exists(pipeline.lstm_model_dir):
+                shutil.rmtree(pipeline.lstm_model_dir)
+                Path(pipeline.lstm_model_dir).mkdir(parents=True, exist_ok=True)
+        
+        # Run the pipeline
         success = pipeline.run_pipeline()
         
-        return 0 if success else 1
+        # Final status and exit
+        if success:
+            logger.info("✅ PIPELINE COMPLETED SUCCESSFULLY!")
+            logger.info("🎯 All stages completed. Check reports/ directory for results.")
+            logger.info("📊 Dashboard available at: http://localhost:5601")
+            return 0
+        else:
+            logger.error("❌ PIPELINE FAILED!")
+            logger.error("🔍 Check logs for detailed error information.")
+            return 1
+            
+    except KeyboardInterrupt:
+        logger.info("🛑 Pipeline interrupted by user")
+        return 130
         
     except Exception as e:
-        logger.error(f"APPLICATION FAILED: {e}")
-        logger.error(f"Full error: {traceback.format_exc()}")
+        logger.error(f"💥 Fatal error: {e}")
+        logger.error(f"Full traceback: {traceback.format_exc()}")
         return 1
 
 if __name__ == "__main__":
