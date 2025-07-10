@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 class MalaysianTourismProducer:
     """Enhanced Reddit producer for Malaysian tourism sentiment analysis"""
     
-    def __init__(self):
+    def __init__(self, bootstrap_servers: str = None, topic_name: str = None, fetch_interval: int = 60, posts_per_fetch: int = 50):
         """Initialize Reddit API and Kafka connections"""
         self.setup_directories()
         self.setup_reddit()
@@ -77,6 +77,35 @@ class MalaysianTourismProducer:
             'start_time': datetime.now()
         }
         
+        # Real-time streaming parameters
+        if bootstrap_servers:
+            self.bootstrap_servers = bootstrap_servers
+            self.topic_name = topic_name
+            self.fetch_interval = fetch_interval
+            self.posts_per_fetch = posts_per_fetch
+            self.should_run = True
+            
+            # DISABLE FILE SAVING IN STREAMING MODE
+            self.file_mode = False
+            self.streaming_mode = True
+            
+            # Initialize Kafka producer for real-time streaming
+            self.producer = KafkaProducer(
+                bootstrap_servers=[bootstrap_servers],
+                value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                key_serializer=lambda k: k.encode('utf-8') if k else None
+            )
+            
+            logger.info(f"✅ Real-time producer initialized - STREAMING ONLY")
+            logger.info(f"📊 Kafka server: {bootstrap_servers}")
+            logger.info(f"📊 Topic: {topic_name}")
+            logger.info(f"📊 Fetch interval: {fetch_interval} seconds")
+            logger.info(f"📊 Posts per fetch: {posts_per_fetch}")
+            logger.info(f"⚠️  NO FILE SAVING - Pure streaming mode")
+        else:
+            # Regular mode - use files
+            self.streaming_mode = False
+    
     def setup_directories(self):
         """Create necessary directories"""
         dirs = ['logs', 'data/raw', 'data/processed', 'data/analytics']
@@ -104,28 +133,31 @@ class MalaysianTourismProducer:
             raise
             
     def setup_kafka(self):
-        """Setup Kafka producer with optimized settings"""
+        """Setup Kafka producer with Docker-optimized settings"""
         if not KAFKA_AVAILABLE:
             logger.info("⚠️ Kafka not available - using file-based storage")
             self.producer = None
-            self.topic = os.getenv('KAFKA_TOPIC', 'reddit-malaysia-tourism')
             self.file_mode = True
             self.setup_file_output()
             return
             
         try:
             self.producer = KafkaProducer(
-                bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092'),
+                bootstrap_servers=['localhost:9092'],  # Docker Kafka
                 value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode('utf-8'),
                 key_serializer=lambda k: k.encode('utf-8') if k else None,
-                batch_size=int(os.getenv('KAFKA_BATCH_SIZE', 16384)),
-                linger_ms=int(os.getenv('KAFKA_LINGER_MS', 10)),
+                batch_size=16384,
+                linger_ms=10,
                 retries=5,
-                acks='all'
+                acks='all',
+                request_timeout_ms=30000,
+                api_version=(2, 8, 0),  # Updated API version
+                connections_max_idle_ms=540000,
+                max_in_flight_requests_per_connection=5
             )
-            self.topic = os.getenv('KAFKA_TOPIC', 'reddit-malaysia-tourism')
+            self.topic = 'malaysian-tourism-sentiment'
             self.file_mode = False
-            logger.info(f"✅ Kafka producer connected to topic: {self.topic}")
+            logger.info(f"✅ Kafka producer connected to Docker Kafka: {self.topic}")
             
         except Exception as e:
             logger.error(f"❌ Kafka connection failed: {e}")
@@ -269,7 +301,8 @@ class MalaysianTourismProducer:
                 'content_type': 'comment',
                 'parent_post_id': parent_post_id,
                 'score': comment.score,
-                'created_date': datetime.fromtimestamp(comment.created_utc, tz=timezone.utc).isoformat(),                'author': str(comment.author) if comment.author else '[deleted]',
+                'created_date': datetime.fromtimestamp(comment.created_utc, tz=timezone.utc).isoformat(),
+                'author': str(comment.author) if comment.author else '[deleted]',
                 'subreddit': str(comment.subreddit),
                 'permalink': f"https://reddit.com{comment.permalink}",
                 'is_malaysia_related': is_relevant,
@@ -286,8 +319,43 @@ class MalaysianTourismProducer:
             self.stats['api_errors'] += 1
             return None
     
+    def publish_to_kafka(self, message: Dict) -> bool:
+        """Publish message to Kafka topic"""
+        try:
+            # Use message ID as key for partitioning
+            key = message.get('id', str(datetime.now().timestamp()))
+            
+            # Send to Kafka
+            future = self.producer.send(self.topic_name, key=key, value=message)
+            
+            # Wait for confirmation (optional, for reliability)
+            future.get(timeout=10)
+            
+            logger.debug(f"📤 Published: {message.get('content_type')} - {message.get('content', '')[:50]}...")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to publish to Kafka: {e}")
+            return False
+    
     def send_to_kafka(self, data: Dict) -> bool:
         """Send data to Kafka topic or save to file with error handling"""
+        
+        # If in streaming mode, ONLY send to Kafka (no file fallback)
+        if hasattr(self, 'streaming_mode') and self.streaming_mode:
+            try:
+                future = self.producer.send(
+                    self.topic_name,  # Use streaming topic name
+                    key=data['id'], 
+                    value=data
+                )
+                future.get(timeout=10)  # Wait for confirmation
+                return True
+            except Exception as e:
+                logger.error(f"❌ Kafka streaming failed: {e}")
+                return False
+        
+        # Regular mode - try Kafka first, then file fallback
         if self.file_mode:
             return self.save_to_file(data)
         
@@ -318,6 +386,97 @@ class MalaysianTourismProducer:
         except Exception as e:
             logger.error(f"Failed to save to file: {e}")
             return False
+    
+    def collect_posts_and_comments(self, limit: int = 50) -> List[Dict]:
+        """Collect posts and comments using ALL strategies for real-time streaming"""
+        posts_data = []
+        
+        try:
+            # Calculate posts per strategy and subreddit
+            posts_per_strategy = limit // len(self.strategies)
+            posts_per_subreddit = max(1, posts_per_strategy // len(self.subreddits))
+            
+            logger.info(f"🔍 Using {len(self.strategies)} strategies: {self.strategies}")
+            logger.info(f"📊 Posts per strategy: {posts_per_strategy}, per subreddit: {posts_per_subreddit}")
+            
+            # Loop through ALL strategies (like producer2.py)
+            for strategy in self.strategies:
+                strategy = strategy.strip()
+                logger.info(f"🔄 Strategy: {strategy.upper()}")
+                
+                for subreddit_name in self.subreddits:
+                    subreddit_name = subreddit_name.strip()
+                    
+                    try:
+                        subreddit = self.reddit.subreddit(subreddit_name)
+                        logger.info(f"📊 Collecting {strategy} posts from r/{subreddit_name} (limit: {posts_per_subreddit})")
+                        
+                        # Apply the SAME strategy logic as producer2.py
+                        if strategy == 'hot':
+                            posts = subreddit.hot(limit=posts_per_subreddit)
+                        elif strategy == 'new':
+                            posts = subreddit.new(limit=posts_per_subreddit)
+                        elif strategy == 'top':
+                            posts = subreddit.top(time_filter=self.time_filter, limit=posts_per_subreddit)
+                        elif strategy == 'search':
+                            # Search for Malaysian tourism keywords (like producer2.py)
+                            search_query = ' OR '.join(self.keywords[:5])  # Use top 5 keywords
+                            logger.info(f"🔍 Searching r/{subreddit_name} for: {search_query}")
+                            posts = subreddit.search(search_query, limit=posts_per_subreddit, time_filter=self.time_filter)
+                        else:
+                            logger.warning(f"Unknown strategy: {strategy}")
+                            continue
+                        
+                        # Process posts from this strategy
+                        strategy_posts = 0
+                        for post in posts:
+                            if post.id in self.processed_posts:
+                                continue
+                                
+                            self.processed_posts.add(post.id)
+                            setattr(post, '_collection_strategy', strategy)  # Track which strategy found this
+                            
+                            # Process post
+                            post_data = self.format_post_data(post)
+                            if post_data:
+                                posts_data.append(post_data)
+                                strategy_posts += 1
+                                
+                                if post_data['is_malaysia_related']:
+                                    logger.info(f"🇲🇾 {strategy.upper()}: {post.title[:60]}...")
+                                
+                                # Collect comments (limited for real-time)
+                                try:
+                                    post.comments.replace_more(limit=0)
+                                    comments = post.comments.list()[:5]  # Limit comments for real-time
+                                    
+                                    for comment in comments:
+                                        comment_data = self.format_comment_data(comment, post.id, post.title)
+                                        if comment_data:
+                                            posts_data.append(comment_data)
+                                            
+                                except Exception as e:
+                                    logger.error(f"Error collecting comments for post {post.id}: {e}")
+                        
+                            # Rate limiting
+                            time.sleep(self.request_delay)
+                            
+                            # Stop if we have enough for this strategy/subreddit
+                            if strategy_posts >= posts_per_subreddit:
+                                break
+                        
+                        logger.info(f"✅ {strategy.upper()} r/{subreddit_name}: {strategy_posts} posts collected")
+                        
+                    except Exception as e:
+                        logger.error(f"❌ Error with {strategy} from r/{subreddit_name}: {e}")
+                        continue
+        
+            logger.info(f"📊 TOTAL COLLECTED: {len(posts_data)} items using all strategies")
+            return posts_data
+
+        except Exception as e:
+            logger.error(f"❌ Error in collect_posts_and_comments: {e}")
+            return posts_data
     
     def collect_from_subreddit(self, subreddit_name: str, strategy: str, limit: int) -> int:
         """Collect posts from a subreddit using specified strategy"""
@@ -384,8 +543,9 @@ class MalaysianTourismProducer:
     def collect_comments(self, post, post_title: str) -> int:
         """Collect comments from a post"""
         try:
-            post.comments.replace_more(limit=0)
-            comments = post.comments.list()[:self.max_comments]
+            post.comments.replace_more(limit=1)  # Expand comment threads
+            comments = post.comments.list()[:self.max_comments]  # Use configured limit instead of 5
+            # OR: comments = post.comments.list()  # For ALL comments
             collected = 0
             
             for comment in comments:
@@ -411,6 +571,55 @@ class MalaysianTourismProducer:
         logger.info(f"  Filtered out: {self.stats['filtered_out']}")
         logger.info(f"  API errors: {self.stats['api_errors']}")
         logger.info(f"  Total items: {self.stats['posts_collected'] + self.stats['comments_collected']}")
+    
+    def start_streaming(self):
+        """Start real-time streaming to Kafka"""
+        logger.info("🚀 Starting real-time Reddit streaming...")
+        
+        try:
+            while self.should_run:
+                start_time = time.time()
+                
+                logger.info(f"📡 Fetching {self.posts_per_fetch} posts...")
+                
+                # Fetch posts and comments
+                posts_data = self.collect_posts_and_comments(limit=self.posts_per_fetch)
+                
+                if posts_data:
+                    # Publish each message to Kafka
+                    published_count = 0
+                    for message in posts_data:
+                        if self.publish_to_kafka(message):
+                            published_count += 1
+                    
+                    logger.info(f"📤 Published {published_count}/{len(posts_data)} messages to Kafka")
+                    
+                    # Log sample of what was published
+                    if posts_data:
+                        sample = posts_data[0]
+                        logger.info(f"📊 Sample: {sample.get('content_type')} - {sample.get('content', '')[:100]}...")
+                else:
+                    logger.warning("⚠️ No posts collected this cycle")
+                
+                # Wait for next fetch cycle
+                elapsed = time.time() - start_time
+                sleep_time = max(0, self.fetch_interval - elapsed)
+                
+                if sleep_time > 0:
+                    logger.info(f"⏱️ Waiting {sleep_time:.1f} seconds until next fetch...")
+                    time.sleep(sleep_time)
+                
+        except KeyboardInterrupt:
+            logger.info("🛑 Streaming stopped by user")
+        except Exception as e:
+            logger.error(f"❌ Streaming error: {e}")
+        finally:
+            self.producer.close()
+            logger.info("✅ Producer closed")
+    
+    def stop_streaming(self):
+        """Stop streaming"""
+        self.should_run = False
     
     def run_collection(self):
         """Main collection process"""
@@ -439,7 +648,8 @@ class MalaysianTourismProducer:
                         
                 if total_collected >= self.max_posts:
                     break
-              # Final statistics
+            
+            # Final statistics
             self.log_progress()
             
             logger.info("✅ COLLECTION COMPLETED!")
