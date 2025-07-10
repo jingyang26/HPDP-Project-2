@@ -17,7 +17,8 @@ Features:
 Author: Big Data & NLP Analytics Team
 Date: July 2, 2025
 """
-
+import os
+import warnings
 import pandas as pd
 import numpy as np
 import pickle
@@ -25,7 +26,14 @@ import json
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any  # Add 'Any'
+import subprocess
+import sys
+
+# === SUPPRESS ALL WARNINGS ===
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'     # Hide TensorFlow INFO & WARN
+warnings.filterwarnings("ignore")            # Hide Python warnings
+logging.getLogger('tensorflow').setLevel(logging.ERROR)  # Hide TensorFlow logs
 
 # Scikit-learn imports
 from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
@@ -63,7 +71,7 @@ logger = logging.getLogger(__name__)
 class MalaysianTourismNBTrainer:
     """Naive Bayes model trainer for Malaysian tourism sentiment analysis"""
     
-    def __init__(self, dataset_path: str = "dataset.csv"):
+    def __init__(self, dataset_path: str = "data/raw/malaysia_tourism_data.csv"):  # ✅ CHANGED
         """Initialize the trainer"""
         self.dataset_path = dataset_path
         self.setup_directories()
@@ -71,6 +79,10 @@ class MalaysianTourismNBTrainer:
         self.models = {}
         self.vectorizers = {}
         self.label_encoder = LabelEncoder()
+        self.pipeline_stats = {
+            'naive_bayes_trained': False,
+            'lstm_trained': False
+        }
         
     def setup_directories(self):
         """Create necessary directories"""
@@ -113,7 +125,7 @@ class MalaysianTourismNBTrainer:
             self.stopwords = set()
     
     def load_dataset(self) -> pd.DataFrame:
-        """Load and validate the three-column dataset (text, language, label)"""
+        """Load and validate the CSV dataset (content, sentiment_label columns)"""
         try:
             logger.info(f"📂 Loading dataset from {self.dataset_path}")
             
@@ -135,8 +147,8 @@ class MalaysianTourismNBTrainer:
             logger.info(f"📊 Dataset shape: {df.shape}")
             logger.info(f"📋 Columns: {list(df.columns)}")
             
-            # Validate required columns
-            required_columns = ['text', 'language', 'label']
+            # Validate required columns for new CSV structure
+            required_columns = ['content', 'sentiment_label']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
@@ -153,6 +165,12 @@ class MalaysianTourismNBTrainer:
                             column_mapping[req_col] = avail_col
                             break
                 
+                # Check for old column names and map them
+                if 'text' in available_cols and 'content' not in available_cols:
+                    column_mapping['content'] = 'text'
+                if 'label' in available_cols and 'sentiment_label' not in available_cols:
+                    column_mapping['sentiment_label'] = 'label'
+                
                 if column_mapping:
                     logger.info(f"🔍 Auto-detected column mapping: {column_mapping}")
                     df = df.rename(columns={v: k for k, v in column_mapping.items()})
@@ -164,19 +182,20 @@ class MalaysianTourismNBTrainer:
             logger.info(f"  Total rows: {len(df)}")
             logger.info(f"  Missing values: {df.isnull().sum().sum()}")
             
-            # Show language distribution
-            if 'language' in df.columns:
-                lang_counts = df['language'].value_counts()
-                logger.info("🌐 Language distribution:")
-                for lang, count in lang_counts.head(10).items():
-                    logger.info(f"  {lang}: {count} ({count/len(df)*100:.1f}%)")
-            
-            # Show label distribution
-            if 'label' in df.columns:
-                label_counts = df['label'].value_counts()
-                logger.info("🏷️ Original label distribution:")
+            # Show sentiment label distribution
+            if 'sentiment_label' in df.columns:
+                label_counts = df['sentiment_label'].value_counts()
+                logger.info("🏷️ Sentiment label distribution:")
                 for label, count in label_counts.items():
                     logger.info(f"  {label}: {count} ({count/len(df)*100:.1f}%)")
+            
+            # Show content length statistics
+            if 'content' in df.columns:
+                df['content_length'] = df['content'].astype(str).str.len()
+                logger.info("📝 Content length statistics:")
+                logger.info(f"  Mean: {df['content_length'].mean():.1f} characters")
+                logger.info(f"  Median: {df['content_length'].median():.1f} characters")
+                logger.info(f"  Max: {df['content_length'].max():.0f} characters")
             
             return df
             
@@ -185,73 +204,85 @@ class MalaysianTourismNBTrainer:
             raise
     
     def filter_and_map_data(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Filter for English language and map labels according to Option A"""
-        logger.info("🔧 Filtering and mapping dataset...")
+        """Clean and standardize sentiment labels (no language filtering needed)"""
+        logger.info("🔧 Cleaning and mapping sentiment labels...")
         
-        # Filter for English language only
         original_size = len(df)
-        df_filtered = df[df['language'] == 'en'].copy()
-        english_size = len(df_filtered)
-        
-        logger.info(f"🌐 Language filtering: {original_size} → {english_size} rows ({english_size/original_size*100:.1f}% English)")
-        
-        if english_size == 0:
-            raise ValueError("No English language data found! Check 'language' column values.")
+        df_filtered = df.copy()
         
         # Clean and standardize labels
-        df_filtered['label'] = df_filtered['label'].astype(str).str.lower().str.strip()
+        df_filtered['sentiment_label'] = df_filtered['sentiment_label'].astype(str).str.lower().str.strip()
         
-        # Show original label distribution after filtering
-        original_labels = df_filtered['label'].value_counts()
-        logger.info("🏷️ English data label distribution (before mapping):")
+        # Show original label distribution
+        original_labels = df_filtered['sentiment_label'].value_counts()
+        logger.info("🏷️ Original sentiment label distribution:")
         for label, count in original_labels.items():
             logger.info(f"  {label}: {count} ({count/len(df_filtered)*100:.1f}%)")
         
-        # Option A: Map uncertainty → neutral, keep positive/negative
+        # Standardize sentiment labels to positive, negative, neutral
         label_mapping = {
+            # Standard labels
             'positive': 'positive',
             'negative': 'negative',
-            'uncertainty': 'neutral',  # Key mapping: uncertainty becomes neutral
-            # Additional common variations
+            'neutral': 'neutral',
+            
+            # Common variations
             'pos': 'positive',
             'neg': 'negative',
-            'uncertain': 'neutral',
-            'neutral': 'neutral',
-            # Handle any numeric labels
+            'neu': 'neutral',
+            
+            # VADER output variations
+            'compound_positive': 'positive',
+            'compound_negative': 'negative',
+            'compound_neutral': 'neutral',
+            
+            # Numeric labels
             '1': 'positive',
             '0': 'neutral', 
-            '-1': 'negative'
+            '-1': 'negative',
+            '2': 'positive',  # Sometimes 2 is very positive
+            
+            # Other common sentiment labels
+            'uncertainty': 'neutral',  # Map uncertainty to neutral
+            'uncertain': 'neutral',
+            'mixed': 'neutral'
         }
         
         # Apply label mapping
-        df_filtered['original_label'] = df_filtered['label'].copy()  # Keep original for reference
-        df_filtered['label'] = df_filtered['label'].map(label_mapping)
+        df_filtered['original_sentiment_label'] = df_filtered['sentiment_label'].copy()
+        df_filtered['sentiment_label'] = df_filtered['sentiment_label'].map(label_mapping)
         
         # Remove rows with unmapped labels
-        unmapped_mask = df_filtered['label'].isna()
-        unmapped_labels = df_filtered[unmapped_mask]['original_label'].unique()
+        unmapped_mask = df_filtered['sentiment_label'].isna()
+        unmapped_labels = df_filtered[unmapped_mask]['original_sentiment_label'].unique()
         
         if len(unmapped_labels) > 0:
-            logger.warning(f"⚠️ Found unmapped labels (will be removed): {unmapped_labels}")
+            logger.warning(f"⚠️ Found unmapped sentiment labels (will be removed): {unmapped_labels}")
+            logger.warning("💡 Consider adding these labels to the mapping if they're valid")
         
         df_filtered = df_filtered[~unmapped_mask].copy()
         
-        # Show final label distribution after mapping
-        final_labels = df_filtered['label'].value_counts()
-        logger.info("🎯 Final label distribution (after Option A mapping):")
+        # Show final label distribution
+        final_labels = df_filtered['sentiment_label'].value_counts()
+        logger.info("🎯 Final sentiment label distribution:")
         for label, count in final_labels.items():
             logger.info(f"  {label}: {count} ({count/len(df_filtered)*100:.1f}%)")
         
-        # Check for class balance issues
+        # Check for class balance
         min_class_size = final_labels.min()
         max_class_size = final_labels.max()
-        imbalance_ratio = max_class_size / min_class_size
+        imbalance_ratio = max_class_size / min_class_size if min_class_size > 0 else float('inf')
         
         if imbalance_ratio > 10:
             logger.warning(f"⚠️ High class imbalance detected (ratio: {imbalance_ratio:.1f})")
             logger.warning("   Consider data balancing techniques if model performance is poor")
+        elif imbalance_ratio > 3:
+            logger.info(f"ℹ️ Moderate class imbalance (ratio: {imbalance_ratio:.1f}) - should be manageable")
+        else:
+            logger.info(f"✅ Good class balance (ratio: {imbalance_ratio:.1f})")
         
-        logger.info(f"✅ Final dataset: {len(df_filtered)} samples with 3 classes")
+        removed_count = original_size - len(df_filtered)
+        logger.info(f"✅ Data cleaning complete: {len(df_filtered)} samples retained ({removed_count} removed)")
         
         return df_filtered
     
@@ -270,8 +301,8 @@ class MalaysianTourismNBTrainer:
             # Tokenization
             tokens = word_tokenize(text.lower())
             
-            # Remove non-alphabetic tokens
-            alpha_tokens = [token for token in tokens if token.isalpha() and len(token) > 2]
+            # Remove non-alphabetic tokens (FIXED LINE)
+            alpha_tokens = [token for token in tokens if token.isalpha() and len(token) > 2]  # ✅ FIXED
             
             # Remove stopwords
             filtered_tokens = [token for token in alpha_tokens if token not in self.stopwords]
@@ -327,27 +358,27 @@ class MalaysianTourismNBTrainer:
             return 'n'
     
     def prepare_data(self, df: pd.DataFrame) -> Tuple[List[str], List[str]]:
-        """Prepare and clean the filtered dataset"""
+        """Prepare and clean the filtered dataset using content and sentiment_label"""
         logger.info("🧹 Preparing and cleaning data...")
         
-        # Remove rows with missing text
-        df_clean = df.dropna(subset=['text', 'label']).copy()
-        logger.info(f"📝 After removing NaN: {len(df_clean)} rows")
+        # Remove rows with missing content or sentiment_label
+        df_clean = df.dropna(subset=['content', 'sentiment_label']).copy()
+        logger.info(f"After removing NaN: {len(df_clean)} rows")
         
-        # Remove empty texts
-        df_clean = df_clean[df_clean['text'].str.strip() != '']
-        logger.info(f"📝 After removing empty text: {len(df_clean)} rows")
+        # Remove empty content
+        df_clean = df_clean[df_clean['content'].astype(str).str.strip() != '']
+        logger.info(f"After removing empty content: {len(df_clean)} rows")
         
-        # Preprocess texts
-        logger.info("🔧 Preprocessing texts...")
+        # Preprocess content texts
+        logger.info("🔧 Preprocessing content texts...")
         texts = []
-        labels = df_clean['label'].tolist()
+        labels = df_clean['sentiment_label'].tolist()
         
-        for i, text in enumerate(df_clean['text']):
-            if i % 1000 == 0:
-                logger.info(f"  Processed {i}/{len(df_clean)} texts")
+        for i, content in enumerate(df_clean['content']):
+            if i % 1000 == 0 and i > 0:
+                logger.info(f"Processed {i}/{len(df_clean)} content texts")
             
-            processed_text = self.preprocess_text(text)
+            processed_text = self.preprocess_text(str(content))
             texts.append(processed_text)
         
         # Remove empty processed texts
@@ -355,7 +386,7 @@ class MalaysianTourismNBTrainer:
         texts = [texts[i] for i in valid_indices]
         labels = [labels[i] for i in valid_indices]
         
-        logger.info(f"✅ Final preprocessed dataset: {len(texts)} samples")
+        logger.info(f"Final preprocessed dataset: {len(texts)} samples")
         
         # Final class distribution
         from collections import Counter
@@ -364,6 +395,15 @@ class MalaysianTourismNBTrainer:
         for label, count in final_distribution.items():
             logger.info(f"  {label}: {count} ({count/len(labels)*100:.1f}%)")
         
+        # Check minimum samples per class
+        min_samples = min(final_distribution.values())
+        if min_samples < 10:
+            logger.warning(f"Very few samples for some classes (min: {min_samples})")
+            logger.warning("   Model training may be unreliable")
+        elif min_samples < 50:
+            logger.warning(f"Limited samples for some classes (min: {min_samples})")
+            logger.warning("   Consider collecting more data for better performance")
+    
         return texts, labels
     
     def train_models(self, texts: List[str], labels: List[str]) -> Dict:
@@ -373,14 +413,14 @@ class MalaysianTourismNBTrainer:
         # Encode labels
         y_encoded = self.label_encoder.fit_transform(labels)
         
-        logger.info(f"🏷️ Label encoding: {dict(zip(self.label_encoder.classes_, range(len(self.label_encoder.classes_))))}")
+        logger.info(f"Label encoding: {dict(zip(self.label_encoder.classes_, range(len(self.label_encoder.classes_))))}")
         
         # Split data with stratification to maintain class balance
         X_train, X_test, y_train, y_test = train_test_split(
             texts, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded
         )
         
-        logger.info(f"📊 Training set: {len(X_train)}, Test set: {len(X_test)}")
+        logger.info(f"Training set: {len(X_train)}, Test set: {len(X_test)}")
         
         # Show train/test distribution
         from collections import Counter
@@ -425,7 +465,7 @@ class MalaysianTourismNBTrainer:
         results = {}
         
         for name, config in configurations.items():
-            logger.info(f"🔧 Training {name} model...")
+            logger.info(f"Training {name} model...")
             
             # Create pipeline
             pipeline = Pipeline([
@@ -462,11 +502,11 @@ class MalaysianTourismNBTrainer:
                 'confusion_matrix': confusion_matrix(y_test, y_pred).tolist()
             }
             
-            logger.info(f"✅ {name}: Accuracy={accuracy:.3f}, F1={f1:.3f}, CV={cv_scores.mean():.3f}±{cv_scores.std():.3f}")
+            logger.info(f"{name}: Accuracy={accuracy:.3f}, F1={f1:.3f}, CV={cv_scores.mean():.3f}±{cv_scores.std():.3f}")
         
         # Find best model
         best_model_name = max(results.keys(), key=lambda k: results[k]['f1_score'])
-        logger.info(f"🏆 Best model: {best_model_name}")
+        logger.info(f"Best model: {best_model_name}")
         
         return results, best_model_name, (X_test, y_test)
     
@@ -519,106 +559,185 @@ class MalaysianTourismNBTrainer:
             )
         }
         
-        logger.info(f"🎯 Tuned model: Accuracy={accuracy:.3f}, F1={f1:.3f}")
-        logger.info(f"🎯 Best parameters: {grid_search.best_params_}")
+        logger.info(f"Tuned model: Accuracy={accuracy:.3f}, F1={f1:.3f}")
+        logger.info(f"Best parameters: {grid_search.best_params_}")
         
         return tuned_results
     
     def save_models(self, results: Dict, best_model_name: str, tuned_results: Dict):
-        """Save trained models and metadata"""
+        """Save trained models and generate comprehensive reports for all configurations"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
+        # Create models/naive_bayes directory
+        Path('models/naive_bayes').mkdir(parents=True, exist_ok=True)
+        
         # Save best model
-        best_model_path = f'models/naive_bayes_best_model_{timestamp}.pkl'
+        best_model_path = f'models/naive_bayes/naive_bayes_best_model_{timestamp}.pkl'
         with open(best_model_path, 'wb') as f:
             pickle.dump(results[best_model_name]['pipeline'], f)
         
-        # Save tuned model
-        tuned_model_path = f'models/naive_bayes_tuned_model_{timestamp}.pkl'
+        # Save tuned model (this is our final best model)
+        tuned_model_path = f'models/naive_bayes/naive_bayes_tuned_model_{timestamp}.pkl'
         with open(tuned_model_path, 'wb') as f:
             pickle.dump(tuned_results['pipeline'], f)
         
         # Save label encoder
-        label_encoder_path = f'models/label_encoder_{timestamp}.pkl'
+        label_encoder_path = f'models/naive_bayes/label_encoder_{timestamp}.pkl'
         with open(label_encoder_path, 'wb') as f:
             pickle.dump(self.label_encoder, f)
         
-        # Save model metadata
-        metadata = {
-            'timestamp': timestamp,
-            'best_model_name': best_model_name,
-            'label_classes': self.label_encoder.classes_.tolist(),
-            'models': {
-                name: {
-                    'accuracy': results[name]['accuracy'],
-                    'precision': results[name]['precision'],
-                    'recall': results[name]['recall'],
-                    'f1_score': results[name]['f1_score'],
-                    'cv_mean': results[name]['cv_mean'],
-                    'cv_std': results[name]['cv_std']
-                }
-                for name in results.keys()
+        # Save vectorizer
+        vectorizer_path = f'models/naive_bayes/vectorizer_{timestamp}.pkl'
+        with open(vectorizer_path, 'wb') as f:
+            pickle.dump(tuned_results['pipeline'].named_steps['vectorizer'], f)
+           
+        # ✅ NEW: Generate comparison report between configurations
+        self.generate_configuration_comparison_report(results, timestamp)
+        
+        # Create main report (for backward compatibility)
+        report_data = {
+            "timestamp": timestamp,
+            "model_path": tuned_model_path,
+            "label_encoder": label_encoder_path,
+            "vectorizer": vectorizer_path,
+            "labels": list(self.label_encoder.classes_),
+            "test_accuracy": float(tuned_results['accuracy']),
+            "confusion_matrix": results[best_model_name]['confusion_matrix'],
+            "classification_report": tuned_results['classification_report'],
+            "strategy": "CSV with VADER sentiment labels",
+            "input_format": {
+                "file_type": "CSV",
+                "content_column": "content",
+                "label_column": "sentiment_label"
             },
-            'tuned_model': {
-                'best_params': tuned_results['best_params'],
-                'accuracy': tuned_results['accuracy'],
-                'f1_score': tuned_results['f1_score']
-            },
-            'file_paths': {
-                'best_model': best_model_path,
-                'tuned_model': tuned_model_path,
-                'label_encoder': label_encoder_path
-            }
+            "data_source": "malaysia_tourism_data_collector_with_vader",
+            "model_type": "naive_bayes",
+            "best_model_name": best_model_name,
+            "hyperparameters": tuned_results['best_params'],
+            "cv_score": float(tuned_results['best_cv_score']),
+            "f1_score": float(tuned_results['f1_score']),
+            "precision": float(tuned_results['precision']),
+            "recall": float(tuned_results['recall'])
         }
         
-        metadata_path = f'models/model_metadata_{timestamp}.json'
-        with open(metadata_path, 'w', encoding='utf-8') as f:
-            json.dump(metadata, f, indent=2, ensure_ascii=False)
+        # Save main report
+        report_path = f'reports/naive_bayes_training_report_{timestamp}.json'
+        with open(report_path, 'w', encoding='utf-8') as f:
+            json.dump(report_data, f, indent=2, ensure_ascii=False)
         
-        logger.info(f"💾 Models saved:")
+        logger.info(f"Models and reports saved:")
         logger.info(f"  Best model: {best_model_path}")
         logger.info(f"  Tuned model: {tuned_model_path}")
         logger.info(f"  Label encoder: {label_encoder_path}")
-        logger.info(f"  Metadata: {metadata_path}")
-        
-        return metadata
-    
-    def generate_report(self, results: Dict, tuned_results: Dict, metadata: Dict):
-        """Generate comprehensive training report"""
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        report_path = f'reports/naive_bayes_training_report_{timestamp}.json'
-        
-        # Combine all results
-        full_report = {
-            'training_timestamp': timestamp,
-            'dataset_info': {
-                'source': self.dataset_path,
-                'preprocessing_enabled': NLP_AVAILABLE
+        logger.info(f"  Vectorizer: {vectorizer_path}")
+        logger.info(f"  Main report: {report_path}")
+        logger.info(f"  Detailed reports: reports/naive_bayes_*_{timestamp}.json")
+
+        # Return metadata
+        metadata = {
+            'timestamp': timestamp,
+            'file_paths': {
+                'best_model': best_model_path,
+                'tuned_model': tuned_model_path,
+                'report': report_path
             },
-            'model_comparison': results,
-            'hyperparameter_tuning': tuned_results,
-            'metadata': metadata,
-            'recommendations': {
-                'best_overall_model': 'tuned_model',
-                'production_ready': True,
-                'integration_notes': [
-                    "Model can be integrated into reddit_tourism_consumer.py",
-                    "Use the tuned model for best performance",
-                    "Preprocessing pipeline matches consumer preprocessing"
-                ]
-            }
+            'test_accuracy': tuned_results['accuracy'],
+            'f1_score': tuned_results['f1_score'],
+            'precision': tuned_results['precision'],
+            'recall': tuned_results['recall']
         }
         
-        # Remove non-serializable objects
-        for model_name in full_report['model_comparison']:
-            del full_report['model_comparison'][model_name]['pipeline']
-        del full_report['hyperparameter_tuning']['pipeline']
+        return metadata
+
+    def generate_configuration_comparison_report(self, results: Dict, timestamp: str):
+        """Generate comparison report between different configurations"""
+        logger.info("📋 Generating configuration comparison report...")
         
-        with open(report_path, 'w', encoding='utf-8') as f:
-            json.dump(full_report, f, indent=2, ensure_ascii=False)
+        # Extract metrics for comparison
+        comparison_data = {
+            "timestamp": timestamp,
+            "comparison_type": "naive_bayes_configurations",
+            "configurations": {},
+            "best_configuration": {},
+            "summary": {}
+        }
         
-        logger.info(f"📊 Training report saved: {report_path}")
-        return report_path
+        # Process each configuration
+        best_f1 = 0
+        best_config = None
+        
+        for config_name, config_results in results.items():
+            config_summary = {
+                "test_accuracy": float(config_results['accuracy']),
+                "precision": float(config_results['precision']),
+                "recall": float(config_results['recall']),
+                "f1_score": float(config_results['f1_score']),
+                "cv_mean": float(config_results['cv_mean']),
+                "cv_std": float(config_results['cv_std']),
+                "vectorizer_type": "tfidf" if "tfidf" in config_name else "count",
+                "classifier_type": "multinomial" if "multinomial" in config_name else "complement"
+            }
+            
+            comparison_data["configurations"][config_name] = config_summary
+            
+            # Track best configuration
+            if config_results['f1_score'] > best_f1:
+                best_f1 = config_results['f1_score']
+                best_config = config_name
+        
+        # Best configuration details
+        comparison_data["best_configuration"] = {
+            "name": best_config,
+            "f1_score": best_f1,
+            "details": comparison_data["configurations"][best_config]
+        }
+        
+        # Generate summary statistics
+        all_accuracies = [config["test_accuracy"] for config in comparison_data["configurations"].values()]
+        all_f1_scores = [config["f1_score"] for config in comparison_data["configurations"].values()]
+        all_precisions = [config["precision"] for config in comparison_data["configurations"].values()]
+        all_recalls = [config["recall"] for config in comparison_data["configurations"].values()]
+        
+        comparison_data["summary"] = {
+            "total_configurations": len(results),
+            "metrics_summary": {
+                "accuracy": {
+                    "min": min(all_accuracies),
+                    "max": max(all_accuracies),
+                    "mean": sum(all_accuracies) / len(all_accuracies),
+                    "std": np.std(all_accuracies)
+                },
+                "f1_score": {
+                    "min": min(all_f1_scores),
+                    "max": max(all_f1_scores),
+                    "mean": sum(all_f1_scores) / len(all_f1_scores),
+                    "std": np.std(all_f1_scores)
+                },
+                "precision": {
+                    "min": min(all_precisions),
+                    "max": max(all_precisions),
+                    "mean": sum(all_precisions) / len(all_precisions),
+                    "std": np.std(all_precisions)
+                },
+                "recall": {
+                    "min": min(all_recalls),
+                    "max": max(all_recalls),
+                    "mean": sum(all_recalls) / len(all_recalls),
+                    "std": np.std(all_recalls)
+                }
+            },
+            "configuration_ranking": sorted(
+                [(name, config["f1_score"]) for name, config in comparison_data["configurations"].items()],
+                key=lambda x: x[1], reverse=True
+            )
+        }
+        
+        # Save comparison report
+        comparison_report_path = f'reports/naive_bayes_comparison_report_{timestamp}.json'
+        with open(comparison_report_path, 'w', encoding='utf-8') as f:
+            json.dump(comparison_data, f, indent=2, ensure_ascii=False)
+        
+        logger.info(f"✅ Saved comparison report: {comparison_report_path}")
     
     def train(self) -> Dict:
         """Main training pipeline with Option A implementation"""
@@ -645,7 +764,7 @@ class MalaysianTourismNBTrainer:
             
             if not expected_labels.issubset(unique_labels):
                 missing = expected_labels - unique_labels
-                logger.warning(f"⚠️ Missing expected labels: {missing}")
+                logger.warning(f"Missing expected labels: {missing}")
             
             # Train multiple models
             results, best_model_name, test_data = self.train_models(texts, labels)
@@ -653,61 +772,76 @@ class MalaysianTourismNBTrainer:
             # Hyperparameter tuning
             tuned_results = self.hyperparameter_tuning(texts, labels)
             
-            # Save models
+            # Save models (report is generated here now)
             metadata = self.save_models(results, best_model_name, tuned_results)
             
-            # Add Option A specific metadata
-            metadata['training_strategy'] = 'option_a_uncertainty_to_neutral'
-            metadata['label_mapping'] = {
-                'positive': 'positive',
-                'negative': 'negative', 
-                'uncertainty': 'neutral'
-            }
-            metadata['language_filter'] = 'en'
-            
-            # Generate report
-            report_path = self.generate_report(results, tuned_results, metadata)
+            # ✅ REMOVED: No separate report generation
+            # report_path = self.generate_report(results, tuned_results, metadata)
             
             logger.info("✅ TRAINING COMPLETED SUCCESSFULLY!")
-            logger.info(f"🎯 Strategy: Option A (uncertainty → neutral)")
-            logger.info(f"🌐 Language: English only")
             logger.info(f"🏷️ Classes: {self.label_encoder.classes_}")
             logger.info(f"🏆 Best model F1-score: {results[best_model_name]['f1_score']:.3f}")
             logger.info(f"🎯 Tuned model F1-score: {tuned_results['f1_score']:.3f}")
-            logger.info(f"📊 Full report: {report_path}")
+            logger.info(f"📊 Report: {metadata['file_paths']['report']}")
             
             return metadata
             
         except Exception as e:
             logger.error(f"❌ Training failed: {e}")
             raise
+    
+    def train_naive_bayes_model(self) -> bool:
+        """Train the Naive Bayes model (only if not exists)"""
+        logger.info("🧠 STEP 1: Checking/Training Naive Bayes Model")
+        logger.info("=" * 50)
+        
+        # Check if model already exists
+        model_status = self.check_models_exist()
+        
+        if model_status['naive_bayes']:
+            logger.info("✅ Naive Bayes model already exists - skipping training")
+            self.pipeline_stats['naive_bayes_trained'] = True
+            return True
+        
+        logger.info("🔄 Naive Bayes model not found - starting training...")
+        
+        try:
+            result = subprocess.run([sys.executable, 'train_naive_bayes_model.py'], 
+                                  capture_output=True, text=True, timeout=300)
+            
+            if result.returncode == 0:
+                logger.info("✅ Naive Bayes training completed")
+                self.pipeline_stats['naive_bayes_trained'] = True
+                return True
+            else:
+                logger.error(f"❌ Naive Bayes training failed: {result.stderr}")
+                return False
+        except Exception as e:
+            logger.error(f"❌ Naive Bayes training error: {e}")
+            return False
 
-def main():
-    """Main execution function"""
+if __name__ == "__main__":
+    """Main execution for training"""
     try:
-        logger.info("🎯 Malaysian Tourism Sentiment Analysis - Option A Training")
-        logger.info("📋 Strategy: English only, uncertainty → neutral")
+        logger.info("🚀 Starting Malaysian Tourism Naive Bayes Training")
         
-        # Initialize trainer
-        trainer = MalaysianTourismNBTrainer("dataset.csv")
+        # Initialize trainer with CSV format
+        trainer = MalaysianTourismNBTrainer(
+            dataset_path="data/raw/malaysia_tourism_data.csv"
+        )
         
-        # Run training
+        # Run training pipeline
         metadata = trainer.train()
         
-        print("\n" + "="*60)
-        print("🎉 NAIVE BAYES MODEL TRAINING COMPLETED!")
-        print("🎯 OPTION A: uncertainty → neutral")
-        print("="*60)
-        print(f"📁 Models saved in: models/")
-        print(f"📊 Reports saved in: reports/")
-        print(f"🏷️ Classes: positive, negative, neutral")
-        print(f"🔗 Integration ready for reddit_tourism_consumer.py")
+        logger.info("✅ Training completed successfully!")
+        logger.info(f"📊 Model metadata: {metadata['file_paths']}")
         
-        return 0
+    except FileNotFoundError:
+        logger.error("❌ Dataset file not found: data/raw/malaysia_tourism_data.csv")
+        logger.error("💡 Make sure to run the data collector first to generate the CSV")
         
     except Exception as e:
         logger.error(f"❌ Training failed: {e}")
-        return 1
+        import traceback
+        logger.error(f"📋 Full error: {traceback.format_exc()}")
 
-if __name__ == "__main__":
-    exit(main())
