@@ -120,53 +120,217 @@ class MalaysianTourismSentimentAnalyzer:
             logger.warning("⚠️ NLP libraries not available")
             self.vader = None
     
-    def load_trained_model(self):
-        """Load the trained Naive Bayes model and label encoder (clean, consistent output)"""
-        model_dir = Path('models')
-        self.trained_model = None
-        self.label_encoder = None
+    def analyze_sentiment_dual_models(self, text: str, title: str = "") -> Dict:
+
+        print(f"\n🔍 DUAL MODEL ANALYSIS - Text: {text[:100]}...")
+        print(f"🔍 DUAL MODEL ANALYSIS - Title: {title}")
+
+        is_comment = not title or title == ""
+        text_preprocessing = self.preprocess_text(text, use_lemmatization=True)
+        title_preprocessing = self._empty_preprocessing_result("") if is_comment else self.preprocess_text(title, use_lemmatization=True)
+
+        # Initialize results
+        naive_bayes_result = {}
+        lstm_result = {}
+
+        # === NAIVE BAYES MODEL ===
+        print("🤖 Running Naive Bayes model...")
         try:
-            print("\n[Naive Bayes] === Model Loading ===")
+            naive_bayes_result = self.analyze_sentiment_with_naive_bayes(text, "" if is_comment else title)
+            print(f"✅ Naive Bayes: {naive_bayes_result.get('label', 'error')} ({naive_bayes_result.get('confidence', 0.0):.3f})")
+        except Exception as e:
+            print(f"❌ Naive Bayes failed: {e}")
+            naive_bayes_result = {
+                'error': str(e),
+                'label': 'error',
+                'confidence': 0.0,
+                'sentiment_score': 0.0,
+                'method': 'naive_bayes_failed'
+            }
+
+        # === LSTM MODEL ===
+        print("🤖 Running LSTM model...")
+        try:
+            lstm_result = self.analyze_sentiment_with_lstm(text, "" if is_comment else title)
+            print(f"✅ LSTM: {lstm_result.get('label', 'error')} ({lstm_result.get('confidence', 0.0):.3f})")
+        except Exception as e:
+            print(f"❌ LSTM failed: {e}")
+            lstm_result = {
+                'error': str(e),
+                'label': 'error',
+                'confidence': 0.0,
+                'sentiment_score': 0.0,
+                'method': 'lstm_failed'
+            }
+
+        # === DETERMINE BEST MODEL FOR FINAL SENTIMENT ===
+        # Priority: LSTM > Naive Bayes > Error fallback
+        if 'error' not in lstm_result:
+            final_sentiment = {
+                'score': lstm_result['sentiment_score'],
+                'label': lstm_result['label'],
+                'confidence': lstm_result['confidence'],
+                'method': 'lstm_primary'
+            }
+            best_model = 'lstm'
+        elif 'error' not in naive_bayes_result:
+            final_sentiment = {
+                'score': naive_bayes_result['sentiment_score'],
+                'label': naive_bayes_result['label'],
+                'confidence': naive_bayes_result['confidence'],
+                'method': 'naive_bayes_primary'
+            }
+            best_model = 'naive_bayes'
+        else:
+            final_sentiment = {
+                'label': 'error',
+                'score': 0.0,
+                'confidence': 0.0,
+                'method': 'both_models_failed'
+            }
+            best_model = 'none'
+
+        # === EXTRACT LINGUISTIC FEATURES ===
+        try:
+            linguistic_features = self.extract_linguistic_features(text_preprocessing, title_preprocessing)
+        except Exception as e:
+            logger.warning(f"Failed to extract linguistic features: {e}")
+            linguistic_features = {
+                'total_tokens': text_preprocessing.get('token_count', 0),
+                'processed_tokens': text_preprocessing.get('processed_count', 0),
+                'text_length': len(text)
+            }
+
+        # === MODEL AGREEMENT ANALYSIS ===
+        model_agreement = {
+            'labels_match': False,
+            'confidence_difference': 0.0,
+            'score_difference': 0.0,
+            'agreement_level': 'unknown'
+        }
+
+        if 'error' not in naive_bayes_result and 'error' not in lstm_result:
+            # Both models succeeded - analyze agreement
+            nb_label = naive_bayes_result.get('label', 'neutral')
+            lstm_label = lstm_result.get('label', 'neutral')
+            nb_conf = naive_bayes_result.get('confidence', 0.0)
+            lstm_conf = lstm_result.get('confidence', 0.0)
+            nb_score = naive_bayes_result.get('sentiment_score', 0.0)
+            lstm_score = lstm_result.get('sentiment_score', 0.0)
+
+            model_agreement = {
+                'labels_match': nb_label == lstm_label,
+                'confidence_difference': abs(nb_conf - lstm_conf),
+                'score_difference': abs(nb_score - lstm_score),
+                'agreement_level': 'high' if nb_label == lstm_label and abs(nb_conf - lstm_conf) < 0.2 else 'low'
+            }
+
+        print(f"🔍 MODEL AGREEMENT: Labels match = {model_agreement['labels_match']}, Level = {model_agreement['agreement_level']}")
+
+        # === RETURN DUAL MODEL RESULTS ===
+        return {
+            'text_length': len(text),
+            'title_length': len(title) if not is_comment else 0,
+            'preprocessing': {
+                'text': text_preprocessing,
+                'title': title_preprocessing,
+                'combined_processed': text_preprocessing['processed_text']
+            },
+            
+            # === SEPARATE MODEL RESULTS ===
+            'naive_bayes_result': naive_bayes_result,
+            'lstm_result': lstm_result,
+            
+            # === MODEL COMPARISON ===
+            'model_agreement': model_agreement,
+            'best_model': best_model,
+            
+            # === FINAL SENTIMENT (for compatibility) ===
+            'final_sentiment': final_sentiment,
+            
+            # === METADATA ===
+            'linguistic_features': linguistic_features,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'model_info': {
+                'has_naive_bayes': self.trained_model is not None,
+                'has_lstm': self.lstm_model is not None,
+                'nb_classes': list(self.label_encoder.classes_) if self.label_encoder else [],
+                'lstm_classes': list(self.lstm_label_encoder.classes_) if self.lstm_label_encoder else [],
+                'analysis_type': 'dual_model_comparison'
+            },
+            
+            # === CONFIDENCE ANALYSIS ===
+            'confidence_analysis': {
+                'nb_confidence': naive_bayes_result.get('confidence', 0.0),
+                'lstm_confidence': lstm_result.get('confidence', 0.0),
+                'average_confidence': (naive_bayes_result.get('confidence', 0.0) + lstm_result.get('confidence', 0.0)) / 2,
+                'confidence_spread': abs(naive_bayes_result.get('confidence', 0.0) - lstm_result.get('confidence', 0.0))
+            }
+        }
+
+    def load_trained_model(self):
+        """Load the latest trained Naive Bayes model and components"""
+        try:
+            # ✅ FIXED: Look in the correct subdirectory
+            model_dir = Path("models/naive_bayes")  # Changed from "models"
+            
             if not model_dir.exists():
-                print("[Naive Bayes] ❌ Models directory not found!")
-                logger.warning("[Naive Bayes] Models directory not found. Train model first.")
+                logger.warning(f"[Naive Bayes] Model directory not found: {model_dir}")
                 return
-            tuned_models = sorted(model_dir.glob('naive_bayes_tuned_model_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
-            best_models = sorted(model_dir.glob('naive_bayes_best_model_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
-            model_path = tuned_models[0] if tuned_models else (best_models[0] if best_models else None)
-            if not model_path:
-                print("[Naive Bayes] ❌ No trained model found!")
+            
+            # Look for tuned models first, then best models
+            model_files = list(model_dir.glob("*tuned_model*.pkl"))
+            if not model_files:
+                model_files = list(model_dir.glob("*best_model*.pkl"))
+            
+            if not model_files:
                 logger.warning("[Naive Bayes] No trained models found. Train model first.")
                 return
-            print(f"[Naive Bayes] Model file: {model_path.name}")
-            with open(model_path, 'rb') as f:
-                self.trained_model = pickle.load(f)
-            parts = model_path.stem.split('_')
-            timestamp = f"{parts[-2]}_{parts[-1]}" if len(parts) >= 2 else parts[-1]
-            label_encoder_path = model_dir / f'label_encoder_{timestamp}.pkl'
-            if not label_encoder_path.exists():
-                label_files = sorted(model_dir.glob('label_encoder_*.pkl'), key=lambda p: p.stat().st_mtime, reverse=True)
-                label_encoder_path = label_files[0] if label_files else None
-            if label_encoder_path and label_encoder_path.exists():
-                with open(label_encoder_path, 'rb') as f:
-                    self.label_encoder = pickle.load(f)
-                print(f"[Naive Bayes] ✅ Loaded model: {model_path.name}")
-                print(f"[Naive Bayes] ✅ Loaded label encoder: {label_encoder_path.name}")
-                logger.info(f"[Naive Bayes] Model and label encoder loaded: {model_path.name}, {label_encoder_path.name}")
+            
+            # Get the latest model file
+            latest_model_file = max(model_files, key=lambda x: x.stat().st_mtime)
+            logger.info(f"[Naive Bayes] Loading model: {latest_model_file}")
+            
+            # ✅ FIXED: Extract timestamp from full filename
+            filename = latest_model_file.name.replace('.pkl', '')
+            parts = filename.split('_')
+            if len(parts) >= 2:
+                timestamp = f"{parts[-2]}_{parts[-1]}"  # Get date_time parts
             else:
-                print("[Naive Bayes] ❌ Label encoder not found!")
-                logger.warning("[Naive Bayes] Label encoder not found. Train model first.")
-                self.trained_model = None
-                self.label_encoder = None
+                logger.error(f"Could not extract timestamp from filename: {filename}")
+                return
+            
+            # ✅ FIXED: Look for supporting files in same directory
+            vectorizer_file = model_dir / f"vectorizer_{timestamp}.pkl"
+            label_encoder_file = model_dir / f"label_encoder_{timestamp}.pkl"
+            
+            # Check if supporting files exist
+            if not vectorizer_file.exists():
+                logger.error(f"[Naive Bayes] Vectorizer not found: {vectorizer_file}")
+                return
+            
+            if not label_encoder_file.exists():
+                logger.error(f"[Naive Bayes] Label encoder not found: {label_encoder_file}")
+                return
+            
+            # Load the model and components
+            with open(latest_model_file, 'rb') as f:
+                self.trained_model = pickle.load(f)
+            
+            with open(vectorizer_file, 'rb') as f:
+                self.vectorizer = pickle.load(f)
+            
+            with open(label_encoder_file, 'rb') as f:
+                self.label_encoder = pickle.load(f)
+            
+            logger.info(f"✅ [Naive Bayes] Model loaded successfully from {latest_model_file.name}")
+            
         except Exception as e:
-            print(f"[Naive Bayes] ❌ Error loading model: {e}")
-            logger.error(f"[Naive Bayes] Failed to load model: {e}")
-            self.trained_model = None
-            self.label_encoder = None
+            logger.error(f"❌ [Naive Bayes] Failed to load trained model: {e}")
 
     def load_lstm_model(self):
         """Load the trained LSTM model, tokenizer, and label encoder (clean, consistent output)"""
-        model_dir = Path('models')
+        model_dir = Path('models/lstm')
         self.lstm_model = None
         self.lstm_tokenizer = None
         self.lstm_label_encoder = None
@@ -1334,6 +1498,7 @@ class MalaysianTourismConsumer:
         except Exception as e:
             logger.error(f"❌ Index pattern API creation failed: {e}")
             return False
+
 def send_to_dashboard(consumer, dashboard, processed_message):
     """Send processed message to dashboard (NO FILTERING - same as CSV)"""
     if not dashboard:
@@ -1405,6 +1570,7 @@ def send_to_dashboard(consumer, dashboard, processed_message):
         import traceback
         logger.error(f"📋 Full error: {traceback.format_exc()}")
         return False
+
 def main(dashboard=None):
     """Main consumer function with dashboard integration"""
     logger.info("🔍 Starting sentiment analysis consumer...")
