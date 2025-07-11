@@ -1461,7 +1461,7 @@ class MalaysianTourismIntegratedPipeline:
 
             # Import dashboard from NDJSON file
             if os.path.exists("export_batch.ndjson"):
-                self.import_kibana_dashboard(es_client, "export_batch.ndjson")
+                self.import_kibana_objects("export_batch.ndjson")
             else:
                 logger.warning("❌ export_batch.ndjson not found")
                 logger.info("💡 Place export_batch.ndjson in the project root for automatic dashboard import")
