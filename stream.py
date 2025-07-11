@@ -522,7 +522,7 @@ class MalaysianTourismRealTimePipeline:
             logger.error(f"❌ Monitoring error: {e}")
 
     def start_dashboard_connection_only(self) -> bool:
-        """Initialize dashboard connection WITHOUT creating index patterns"""
+        """Initialize dashboard connection WITHOUT creating index patterns (they come from NDJSON)"""
         logger.info("📊 STEP 2: Initializing Dashboard Connection")
         logger.info("=" * 50)
         
@@ -544,17 +544,19 @@ class MalaysianTourismRealTimePipeline:
             
             logger.info("✅ Dashboard connection established")
             
-            # Create index template (but NOT index patterns)
+            # ✅ FIXED: Only create index template, NOT index patterns
             if self.dashboard.create_index_template():
                 logger.info("✅ Index template created")
             else:
                 logger.warning("⚠️ Index template creation failed")
             
-            # Create index pattern
-            if self.create_index_patterns():
-                logger.info("✅ Index patterns ready")
-            else:
-                logger.warning("⚠️ Index patterns creation failed")
+            # ❌ REMOVED: Don't create index patterns here - they come from NDJSON
+            # if self.create_index_patterns():
+            #     logger.info("✅ Index patterns ready")
+            # else:
+            #     logger.warning("⚠️ Index patterns creation failed")
+            
+            logger.info("ℹ️  Index patterns will be imported from export.ndjson")
             
             return True
             
